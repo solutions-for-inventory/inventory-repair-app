@@ -109,14 +109,16 @@ Supplier_ sql=t_supplier
 
 OrgUserScope_ json sql=t_org_user_scope
     Id sql=org_user_scope_id
-    userId User_Id
+    userId Person_Id
     orgUnitId OrgUnit_Id
+    Foreign User_ fkt_user userId
     deriving Show
 
 UserRole_ json sql=t_user_role
     Id sql=user_role_id
-    userId User_Id
+    userId Person_Id
     roleId Role_Id
+    Foreign User_ fkt_user userId
     deriving Show
 
 RolePrivilege_ json sql=t_role_privilege
@@ -127,8 +129,9 @@ RolePrivilege_ json sql=t_role_privilege
 
 UserPrivilege_ json sql=t_user_privilege
     Id sql=user_privilege_id
-    userId User_Id
+    userId Person_Id
     privilegeId Privilege_Id
+    Foreign User_ fkt_user userId
     deriving Show
 
 PartCategory_ sql=t_part_category
@@ -172,7 +175,7 @@ Part_ sql=t_item
     model Text Maybe
     notes Text Maybe
     status EntityStatus
-    partCategoryId Part_PartCategory_Id Maybe
+    partCategoryId PartCategory_Id Maybe
     unitId Unit_Id Maybe
     orgUnitId OrgUnit_Id
     createdDate UTCTime
@@ -204,11 +207,13 @@ Order_ sql=t_order
     status EntityStatus
     notes Text
     inventoryId Inventory_Id
-    supplierId Supplier_Id
-    emitterId User_Id
+    supplierId Person_Id
+    emitterId Person_Id
     orgUnitId OrgUnit_Id
     createdDate UTCTime
     modifiedDate UTCTime Maybe
+    Foreign User_ fkt_user emitterId
+    Foreign Supplier_ fkt_supplier supplierId
     deriving Typeable Show
 
 InventoryOrder_ sql=t_inventory_order
@@ -233,8 +238,11 @@ Payment_ sql=t_payment
     paymentFee          Double
     paymentDate         UTCTime
     transactionId       Text
+    takenById           Person_Id
+    orgUnitId           OrgUnit_Id
     createdDate         UTCTime
     modifiedDate        UTCTime Maybe
+    Foreign User_ fkt_user takenById
     deriving Typeable Show
 
 Sale_ sql=t_sale
@@ -243,12 +251,14 @@ Sale_ sql=t_sale
     saleDate            UTCTime
     status              EntityStatus
     notes               Text
-    saleAgentId         User_Id
-    customerId          Customer_Id
+    saleAgentId         Person_Id
+    customerId          Person_Id
     orgUnitId           OrgUnit_Id
     paymentId           Payment_Id
     createdDate         UTCTime
     modifiedDate        UTCTime Maybe
+    Foreign User_ fkt_user saleAgentId
+    Foreign Customer_ fkt_customer customerId
     deriving Typeable Show
 
 SaleDetail_ sql=t_sale_detail
