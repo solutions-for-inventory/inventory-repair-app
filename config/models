@@ -87,7 +87,7 @@ User_ sql=t_user
     UniqueUserEmail email
     deriving Typeable Show
 
-Customer_ json sql=t_customer
+Customer_ sql=t_customer
     customerId Person_Id
     Primary customerId
     Id sql=customer_id
@@ -97,11 +97,12 @@ Customer_ json sql=t_customer
     modifiedDate UTCTime Maybe
     deriving Typeable Show
 
-Supplier_ json sql=t_supplier
+Supplier_ sql=t_supplier
     supplierId Person_Id
     Primary supplierId
     name Text
     webpage Text
+    status EntityStatus
     createdDate UTCTime
     modifiedDate UTCTime Maybe
     deriving Typeable Show
@@ -135,7 +136,7 @@ PartCategory_ sql=t_part_category
     name Text
     key Text Maybe
     description Text
-    parentId PartCategory_Id
+    parentId PartCategory_Id Maybe
     createdDate UTCTime
     modifiedDate UTCTime Maybe
     deriving Typeable Show
