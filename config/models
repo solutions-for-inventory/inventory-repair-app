@@ -1,0 +1,262 @@
+-- By default this file is used by `persistFileWith` in Model.hs (which is imported by Foundation.hs)
+-- Syntax for this file here: https://github.com/yesodweb/persistent/blob/master/docs/Persistent-entity-syntax.md
+
+OrgUnit_ sql=t_org_unit
+    Id sql=org_unit_id
+    name Text
+    org_code Text
+    webpage Text
+    facebook Text
+    status EntityStatus
+    locale Locale
+    createdDate UTCTime
+    modifiedDate UTCTime Maybe
+    UniqueOrgUnit org_code
+    deriving Typeable Show
+
+Person_ json sql=t_person
+    Id sql=person_id
+    firstName Text
+    lastName Text
+    documentType Text
+    documentId Text
+    orgUnitId OrgUnit_Id
+    createdDate UTCTime
+    modifiedDate UTCTime Maybe
+    UniquePersonDocumentId documentId
+    deriving Typeable Show
+
+Address_ json sql=t_address
+    Id sql=address_id
+    street1 Text
+    street2 Text
+    street3 Text
+    zip Text
+    city Text
+    state Text
+    country Text
+    personId Person_Id
+    createdDate UTCTime
+    modifiedDate UTCTime Maybe
+    UniqueAddressPersonId personId
+    deriving Typeable Show
+
+ContactInfo_ json sql=t_contact_info
+    Id sql=contact_info_id
+    contactType Text
+    contact Text
+    personId Person_Id
+    createdDate UTCTime
+    modifiedDate UTCTime Maybe
+    deriving Typeable Show
+
+Role_ json sql=t_role
+    Id sql=role_id
+    key Text
+    name Text
+    description Text Maybe
+    active Bool
+    createdDate UTCTime
+    modifiedDate UTCTime Maybe
+    deriving Show
+
+Privilege_ json sql=t_privilege
+    Id sql=privilege_id
+    key Text
+    name Text
+    description Text Maybe
+    active Bool
+    createdDate UTCTime
+    modifiedDate UTCTime Maybe
+    deriving Show
+
+User_ sql=t_user
+    userId Person_Id
+    Primary userId
+    Id sql=user_id
+    username Text
+    email Text
+    password Text
+    status EntityStatus
+    locale Locale
+    expiration Bool
+    newPasswordRequired Bool
+    createdDate UTCTime
+    modifiedDate UTCTime Maybe
+    UniqueUserUsername username
+    UniqueUserEmail email
+    deriving Typeable Show
+
+Customer_ json sql=t_customer
+    customerId Person_Id
+    Primary customerId
+    Id sql=customer_id
+    status EntityStatus
+    locale Text
+    createdDate UTCTime
+    modifiedDate UTCTime Maybe
+    deriving Typeable Show
+
+Supplier_ json sql=t_supplier
+    supplierId Person_Id
+    Primary supplierId
+    name Text
+    webpage Text
+    createdDate UTCTime
+    modifiedDate UTCTime Maybe
+    deriving Typeable Show
+
+OrgUserScope_ json sql=t_org_user_scope
+    Id sql=org_user_scope_id
+    userId User_Id
+    orgUnitId OrgUnit_Id
+    deriving Show
+
+UserRole_ json sql=t_user_role
+    Id sql=user_role_id
+    userId User_Id
+    roleId Role_Id
+    deriving Show
+
+RolePrivilege_ json sql=t_role_privilege
+    Id sql=role_privilege_id
+    roleId Role_Id
+    privilegeId Privilege_Id
+    deriving Show
+
+UserPrivilege_ json sql=t_user_privilege
+    Id sql=user_privilege_id
+    userId User_Id
+    privilegeId Privilege_Id
+    deriving Show
+
+PartCategory_ sql=t_part_category
+    Id sql=part_category_id
+    name Text
+    key Text Maybe
+    description Text
+    parentId PartCategory_Id
+    createdDate UTCTime
+    modifiedDate UTCTime Maybe
+    deriving Typeable Show
+
+Inventory_ sql=t_inventory
+    Id sql=inventory_id
+    name Text
+    description Text
+    status EntityStatus
+    allowNegativeStocks Bool
+    orgUnitId OrgUnit_Id
+    createdDate UTCTime
+    modifiedDate UTCTime Maybe
+    UniqueInventoryName name
+    deriving Typeable Show
+
+Unit_ json sql=t_unit
+    Id sql=unit_id
+    key Text
+    label Text
+    createdDate UTCTime
+    modifiedDate UTCTime Maybe
+    deriving Typeable Show
+
+Part_ sql=t_item
+    Id sql=item_id
+    partNumber Text Maybe
+    name Text
+    defaultPrice Double
+    description Text Maybe
+    images [Text]
+    manufacturer Text Maybe
+    model Text Maybe
+    notes Text Maybe
+    status EntityStatus
+    partCategoryId Part_PartCategory_Id Maybe
+    unitId Unit_Id Maybe
+    orgUnitId OrgUnit_Id
+    createdDate UTCTime
+    modifiedDate UTCTime Maybe
+    deriving Typeable Show
+
+InventoryPart_ sql=t_inventory_part
+    Id sql=inventory_part_id
+    code Text
+    status EntityStatus
+    level Int
+    maxLevelAllowed Int
+    minLevelAllowed Int
+    price Double
+    location Text
+    dateExpiry UTCTime Maybe
+    partId Part_Id
+    inventoryId Inventory_Id
+    createdDate UTCTime
+    modifiedDate UTCTime Maybe
+    UniqueInventoryIdItemId inventoryId partId
+    deriving Typeable Show
+
+Order_ sql=t_order
+    Id sql=order_id
+    discount Double
+    orderDate UTCTime
+    deliveredLeadTime UTCTime
+    status EntityStatus
+    notes Text
+    inventoryId Inventory_Id
+    supplierId Supplier_Id
+    emitterId User_Id
+    orgUnitId OrgUnit_Id
+    createdDate UTCTime
+    modifiedDate UTCTime Maybe
+    deriving Typeable Show
+
+InventoryOrder_ sql=t_inventory_order
+    Id sql=inventory_order_id
+    quantity Int
+    price Double
+    discount Double
+    subTotalPrice Double
+    notes Text
+    inventoryPartId InventoryPart_Id
+    oderId Order_Id
+    createdDate UTCTime
+    modifiedDate UTCTime Maybe
+    deriving Typeable Show
+
+Payment_ sql=t_payment
+    Id sql=payment_id
+    paymentMode         Text
+    paymentStatus       Text
+    paymentGross        Double
+    paymentBilled       Double
+    paymentFee          Double
+    paymentDate         UTCTime
+    transactionId       Text
+    createdDate         UTCTime
+    modifiedDate        UTCTime Maybe
+    deriving Typeable Show
+
+Sale_ sql=t_sale
+    Id sql=sale_id
+    discount            Double
+    saleDate            UTCTime
+    status              EntityStatus
+    notes               Text
+    saleAgentId         User_Id
+    customerId          Customer_Id
+    orgUnitId           OrgUnit_Id
+    paymentId           Payment_Id
+    createdDate         UTCTime
+    modifiedDate        UTCTime Maybe
+    deriving Typeable Show
+
+SaleDetail_ sql=t_sale_detail
+    Id sql=sale_detail_id
+    quantity            Int
+    price               Double
+    discount            Double
+    partId              Part_Id
+    saleId              Sale_Id
+    createdDate         UTCTime
+    modifiedDate        UTCTime Maybe
+    deriving Typeable Show
