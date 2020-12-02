@@ -11,12 +11,12 @@
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE RecordWildCards       #-}
 
-module Graphql.Asset.Inventory.Persistence (createOrUpdateInventory) where
+module Graphql.Inventory.Persistence (createOrUpdateInventory) where
 
 import Import
 import Database.Persist.Sql (toSqlKey, {-fromSqlKey-})
 import Enums
-import Graphql.Asset.DataTypes
+import Graphql.DataTypes
 
 -- DB ACTIONS
 --dbFetchInventoryById:: Inventory_Id -> Handler (Inventory Res)
@@ -30,13 +30,13 @@ import Graphql.Asset.DataTypes
 --                       return $ P.map toInventoryQL inventories
 
 --fetchInventoriesForItemQuery :: Part_Id -> Handler [Entity Inventory_]
---fetchInventoriesForItemQuery itemId = do
+--fetchInventoriesForItemQuery partId = do
 --                      result <- runDB
 --                                   $ E.select
 --                                   $ E.from $ \ inventory -> do
 --                                        let subquery =
 --                                              E.from $ \inventoryItem -> do
---                                              E.where_ (inventoryItem ^. InventoryPart_ItemId E.==. E.val itemId)
+--                                              E.where_ (inventoryItem ^. InventoryPart_PartId E.==. E.val partId)
 --                                              return (inventoryItem ^. InventoryPart_InventoryId)
 --                                        E.where_ (inventory ^. Inventory_Id `E.in_` E.subList_select subquery)
 --                                        E.orderBy [E.asc (inventory ^. Inventory_Id)]

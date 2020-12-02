@@ -11,7 +11,7 @@
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE RecordWildCards       #-}
 
-module Graphql.Asset.InventoryItem.Resolvers (
+module Graphql.InventoryPart.Resolvers (
         inventoryItemsResolver
       , getInventoryItemByIdResolver_
       , inventoryItemsPageResolver_
@@ -26,12 +26,12 @@ import Database.Persist.Sql (toSqlKey, fromSqlKey)
 import Prelude as P
 import qualified Data.Text as T
 import Graphql.Utils
-import {-# SOURCE #-} Graphql.Asset.Item.Resolvers
-import {-# SOURCE #-} Graphql.Asset.Inventory.Resolvers
-import Graphql.Asset.Unit ()
-import Graphql.Asset.DataTypes
-import Graphql.Asset.DataTypes ()
-import Graphql.Asset.InventoryItem.Persistence
+import {-# SOURCE #-} Graphql.Part.Resolvers
+import {-# SOURCE #-} Graphql.Inventory.Resolvers
+import Graphql.Unit ()
+import Graphql.DataTypes
+import Graphql.DataTypes ()
+import Graphql.InventoryPart.Persistence
 
 -- Query Resolvers
 inventoryItemsResolver :: (Applicative f, Typeable o, MonadTrans (o ())) => () -> f (InventoryItems o)
@@ -43,7 +43,7 @@ inventoryItemsResolver _ = pure InventoryItems { inventoryItem = findInventoryIt
 findInventoryItemByIdResolver :: (Typeable o, MonadTrans t, MonadTrans (o ())) => EntityIdArg -> t Handler (InventoryItem o)
 findInventoryItemByIdResolver EntityIdArg {..} = lift $ do
                                               let inventoryItemId = (toSqlKey $ fromIntegral $ entityId)::InventoryPart_Id
---                                              let inventoryItemId = InventoryPart_Key {unInventoryPart_Key  = itemId}
+--                                              let inventoryItemId = InventoryPart_Key {unInventoryPart_Key  = partId}
                                               inventoryItem <- runDB $ getJustEntity inventoryItemId
                                               return $ toInventoryItemQL inventoryItem
 
@@ -71,9 +71,9 @@ inventoryItemsPageResolver_ inventoryId page = lift $ do
                                        pageSize' = case pageSize of Just y -> y; Nothing -> 10
 
 inventoryItemsItemPageResolver_ :: (Typeable o, MonadTrans t, MonadTrans (o ())) => Part_Id -> PageArg -> t Handler (Page (InventoryItem o))
-inventoryItemsItemPageResolver_ itemId (PageArg {..}) = lift $ do
-                                    countItems <- runDB $ count ([InventoryPart_ItemId ==. itemId] :: [Filter InventoryPart_])
-                                    items <- runDB $ selectList [InventoryPart_ItemId ==. itemId] [Asc InventoryPart_Id, LimitTo pageSize', OffsetBy $ pageIndex' * pageSize']
+inventoryItemsItemPageResolver_ partId (PageArg {..}) = lift $ do
+                                    countItems <- runDB $ count ([InventoryPart_PartId ==. partId] :: [Filter InventoryPart_])
+                                    items <- runDB $ selectList [InventoryPart_PartId ==. partId] [Asc InventoryPart_Id, LimitTo pageSize', OffsetBy $ pageIndex' * pageSize']
                                     let itemsQL = P.map (\r -> toInventoryItemQL r) items
                                     return Page { totalCount = countItems
                                                 , content = itemsQL
@@ -113,7 +113,7 @@ inventoryItemsPageResolver PageArg {..} = lift $ do
                                           Nothing -> 10
 
 -- Mutation Resolvers
-saveInventoryItemResolver :: (Typeable o, MonadTrans t, MonadTrans (o ())) => InventoryItemArg -> t Handler (InventoryItem o)
+saveInventoryItemResolver :: (Typeable o, MonadTrans t, MonadTrans (o ())) => InventoryPartArg -> t Handler (InventoryItem o)
 saveInventoryItemResolver arg = lift $ do
                               inventoryItemId <- createOrUpdateInventoryItem arg
                               inventoryItem <- runDB $ getJustEntity inventoryItemId
@@ -122,7 +122,7 @@ saveInventoryItemResolver arg = lift $ do
 saveInventoryItemsResolver :: (Typeable o, MonadTrans t, MonadTrans (o ())) => InventoryItemsArg -> t Handler [InventoryItem o]
 saveInventoryItemsResolver arg = lift $ do
                               let InventoryItemsArg {..} = arg
-                              let inventoryItemArgs =  P.map (\itemId -> InventoryItemArg { inventoryItemId = 0
+                              let inventoryItemArgs =  P.map (\partId -> InventoryPartArg { inventoryItemId = 0
                                                                                           , level = level
                                                                                           , maxLevelAllowed = maxLevelAllowed
                                                                                           , minLevelAllowed = minLevelAllowed
@@ -130,7 +130,7 @@ saveInventoryItemsResolver arg = lift $ do
                                                                                           , location = location
                                                                                           , inventoryId = inventoryId
                                                                                           , dateExpiry = dateExpiry
-                                                                                          , itemId = itemId
+                                                                                          , partId = partId
                                                                                           }) itemIds
                               inventoryItemIds <- createOrUpdateInventoryItems inventoryItemArgs
                               inventoryItems <- runDB $ mapM getJustEntity inventoryItemIds
@@ -146,7 +146,7 @@ toInventoryItemQL (Entity inventoryItemId inventoryItem) = InventoryItem { inven
                                                                          , status = T.pack $ show inventoryPart_Status
                                                                          , dateExpiry = de
                                                                          , inventory = getInventoryByIdResolver_ inventoryPart_InventoryId
-                                                                         , item = getItemByIdResolver_ inventoryPart_ItemId
+                                                                         , item = getItemByIdResolver_ inventoryPart_PartId
                                                                          , createdDate = fromString $ show inventoryPart_CreatedDate
                                                                          , modifiedDate = m
                                                                          }

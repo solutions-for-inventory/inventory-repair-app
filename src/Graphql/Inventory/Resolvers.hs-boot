@@ -13,13 +13,13 @@
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE RecordWildCards       #-}
 
-module Graphql.Asset.Item.Resolvers (
-    getItemByIdResolver_
-    , toItemQL
+
+module Graphql.Inventory.Resolvers (
+    getInventoryByIdResolver_
 ) where
 
 import Import
-import Graphql.Asset.DataTypes
+import Graphql.DataTypes
 
-getItemByIdResolver_ :: forall (o :: * -> (* -> *) -> * -> *).(Typeable o, MonadTrans (o ())) => Part_Id -> () -> o () Handler (Item o)
-toItemQL :: forall (o :: * -> (* -> *) -> * -> *).(Typeable o, MonadTrans (o ())) => Entity Part_ -> Item o
+getInventoryByIdResolver_ :: forall (o :: * -> (* -> *) -> * -> *).(Typeable o, MonadTrans (o ())) => Inventory_Id -> () -> o () Handler (Inventory o)
+--toInventoryQL :: forall (o :: * -> (* -> *) -> * -> *).(Typeable o, MonadTrans (o ())) => Entity Inventory_ -> Inventory o

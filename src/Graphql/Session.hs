@@ -58,17 +58,18 @@ getUserSessionResolver () = lift $ do
 --                                     () <- case muid of
 --                                              Nothing -> $logWarn   "Test log"
 --                                              Just a -> $logWarn   a
-                                     let userKey = case muid of
+                                     let userId = case muid of
                                                     Nothing -> 0
                                                     Just a -> read $ P.filter  (\c -> isDigit c) (T.unpack a) :: Int
-                                     let userId = (toSqlKey $ fromIntegral $ userKey)::User_Id
-                                     Entity _ user <- runDB $ getJustEntity userId
+                                     let personId = (toSqlKey $ fromIntegral $ userId)::Person_Id
+                                     let userKey = User_Key {unUser_Key = personId}
+                                     Entity _ user <- runDB $ getJustEntity userKey
                                      let User_ {..} = user
-                                     Entity _ person <- runDB $ getJustEntity user_PersonId
-                                     permissions <- getPermissions userId
-                                     return $ toSessionQL userKey user person (P.map (\p -> unSingle p) permissions)
+                                     Entity _ person <- runDB $ getJustEntity personId
+                                     permissions <- getPermissions personId
+                                     return $ toSessionQL userId user person (P.map (\p -> unSingle p) permissions)
 
-getPermissions :: User_Id -> Handler [Single Text]
+getPermissions :: Person_Id -> Handler [Single Text]
 getPermissions userId = do
                          permissions <- runDB $ rawSql permissionsSql [toPersistValue userId, toPersistValue userId]
                          return permissions

@@ -13,14 +13,14 @@
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE RecordWildCards       #-}
 
-module Graphql.Asset.DataTypes where
+module Graphql.DataTypes where
 
 import Import
 import GHC.Generics
 import Data.Morpheus.Types (GQLType)
 import Graphql.Utils (Page, PageArg, EntityIdArg, EntityChangeStatusArg)
-import Graphql.Category
-import Graphql.Asset.Unit
+import Graphql.PartCategory
+import Graphql.Unit
 
 data Inventory o = Inventory { inventoryId :: Int
                              , name :: Text
@@ -28,7 +28,7 @@ data Inventory o = Inventory { inventoryId :: Int
                              , allowNegativeStocks :: Bool
                              , status :: Text
                              , inventoryItems :: PageArg -> o () Handler (Page (InventoryItem o))
-                             , availableItems :: PageArg -> o () Handler (Page (Item o))
+                             , availableItems :: PageArg -> o () Handler (Page (Part o))
                              , createdDate :: Text
                              , modifiedDate :: Maybe Text
                              } deriving (Generic, GQLType)
@@ -57,26 +57,27 @@ data InventoryItem o = InventoryItem { inventoryItemId :: Int
                                      , location :: Text
                                      , dateExpiry :: Maybe Text
                                      , inventory :: () -> o () Handler (Inventory o)
-                                     , item :: () -> o () Handler (Item o)
+                                     , item :: () -> o () Handler (Part o)
                                      , createdDate :: Text
                                      , modifiedDate :: Maybe Text
                                      } deriving (Generic, GQLType)
 
 data InventoryItems o = InventoryItems { inventoryItem :: EntityIdArg -> o () Handler (InventoryItem o)
                                        , page :: PageArg -> o () Handler (Page (InventoryItem o))
-                                       , saveInventoryItem :: InventoryItemArg -> o () Handler (InventoryItem o)
+                                       , saveInventoryItem :: InventoryPartArg -> o () Handler (InventoryItem o)
                                        } deriving (Generic, GQLType)
 
-data InventoryItemArg = InventoryItemArg { inventoryItemId :: Int
+data InventoryPartArg = InventoryPartArg { inventoryItemId :: Int
                                          , status :: Text
                                          , level :: Int
+                                         , code :: Text
                                          , maxLevelAllowed :: Int
                                          , minLevelAllowed :: Int
                                          , price :: Float
                                          , location :: Text
                                          , inventoryId :: Int
                                          , dateExpiry :: Maybe Text
-                                         , itemId :: Int
+                                         , partId :: Int
                                          } deriving (Generic, GQLType)
 
 data InventoryItemsArg = InventoryItemsArg { level :: Int
@@ -89,37 +90,35 @@ data InventoryItemsArg = InventoryItemsArg { level :: Int
                                            , itemIds :: [Int]
                                            } deriving (Generic, GQLType)
 
-data Item o = Item { itemId :: Int
-                   , code :: Text
+data Part o = Part { partId :: Int
+                   , partNumber :: Text
                    , name :: Text
                    , defaultPrice :: Float
                    , description :: Maybe Text
-                   , partNumber :: Maybe Text
                    , manufacturer :: Maybe Text
                    , model :: Maybe Text
                    , itemType :: Text
                    , notes:: Maybe Text
                    , status :: Text
                    , images :: [Text]
-                   , category :: Maybe(() -> o () Handler Category)
+                   , partCategory :: Maybe(() -> o () Handler PartCategory)
                    , unit :: Maybe (() -> o () Handler Unit)
                    , inventoryItems :: PageArg -> o () Handler (Page (InventoryItem o))
                    , createdDate :: Text
                    , modifiedDate :: Maybe Text
                    } deriving (Generic, GQLType)
 
-data Items o = Items { item :: EntityIdArg -> o () Handler (Item o)
-                     , page :: PageArg -> o () Handler (Page (Item o))
-                     , saveItem :: ItemArg -> o () Handler (Item o)
+data Items o = Items { item :: EntityIdArg -> o () Handler (Part o)
+                     , page :: PageArg -> o () Handler (Page (Part o))
+                     , saveItem :: PartArg -> o () Handler (Part o)
                      , changeItemStatus :: EntityChangeStatusArg -> o () Handler Bool
                      } deriving (Generic, GQLType)
 
-data ItemArg = ItemArg { itemId :: Int
-                       , code :: Text
+data PartArg = PartArg { partId :: Int
+                       , partNumber :: Text
                        , name :: Text
                        , defaultPrice :: Float
                        , description :: Maybe Text
-                       , partNumber :: Maybe Text
                        , manufacturer :: Maybe Text
                        , model :: Maybe Text
                        , itemType :: Text
@@ -144,7 +143,7 @@ query {
         hasPreview
       }
       content {
-        itemId
+        partId
         name
         unit
         defaultPrice
@@ -164,8 +163,8 @@ query {
 }
 
 mutation {
-  saveRole(itemId:10, key: "test12", name: "sloss", description: "option" active: true) {
-    itemId
+  saveRole(partId:10, key: "test12", name: "sloss", description: "option" active: true) {
+    partId
     key
     description
     active

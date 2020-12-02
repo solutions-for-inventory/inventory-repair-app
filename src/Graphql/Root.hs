@@ -28,16 +28,16 @@ import           Graphql.Admin.Role
 import           Graphql.Admin.DataTypes
 import           Graphql.Admin.Person
 import           Graphql.Admin.User
-import           Graphql.Category
-import           Graphql.Asset.Unit
+import           Graphql.PartCategory
+import           Graphql.Unit
 --import           Graphql.Maintenance.SubTask.SubTaskKind
 --import           Graphql.Maintenance.Task.TaskCategory
-import           Graphql.Asset.Item.Resolvers
-import           Graphql.Asset.Inventory.Resolvers
-import           Graphql.Asset.InventoryItem.Resolvers
+import           Graphql.Part.Resolvers
+import           Graphql.Inventory.Resolvers
+import           Graphql.InventoryPart.Resolvers
 import           Graphql.Utils ()
-import           Graphql.Asset.DataTypes
---import           Graphql.Asset.Human.EmployeeJob
+import           Graphql.DataTypes
+--import           Graphql.Human.EmployeeJob
 -- importGQLDocumentWithNamespace "schema.gql"
 
 data QueryQL m = QueryQL { -- deity :: DeityArgs -> m Deity
@@ -48,7 +48,7 @@ data QueryQL m = QueryQL { -- deity :: DeityArgs -> m Deity
 --                         , users :: () -> m Users
                          , persons :: () -> Res () Handler (Persons Res)
                          , users :: () -> Res () Handler (Users Res)
-                         , categories :: CategoryFilter -> m [Category]
+                         , categories :: PartCategoryFilter -> m [PartCategory]
                          , units :: () -> m [Unit]
                          , inventories :: () -> Res () Handler (Inventories Res)
                          , items :: () -> Res () Handler (Items Res)
@@ -60,14 +60,14 @@ data Mutation m = Mutation { savePrivilege :: PrivilegeArg -> m Privilege
                            , persons :: () -> MutRes () Handler (Persons MutRes)
                            , users :: () -> MutRes () Handler (Users MutRes)
 --                           , savePerson :: PersonArg -> m (Person MutRes)
-                           , saveCategory :: CategoryArg -> m Category
+                           , saveCategory :: PartCategoryArg -> m PartCategory
                            , saveUnit :: UnitArg -> m Unit
---                           , saveTaskCategory :: TaskCategoryArg -> m TaskCategory
+--                           , saveTaskCategory :: TaskPartCategoryArg -> m TaskCategory
 --                           , saveSubTaskKind :: SubTaskKindArg -> m SubTaskKind
 --                           , saveEmployeeJob :: EmployeeJobArg -> m EmployeeJob
 --                           , saveInventory :: InventoryArg -> m (Inventory MutRes)
---                           , saveItem :: ItemArg -> m (Item MutRes)
---                           , saveInventoryItem :: InventoryItemArg -> m (InventoryItem MutRes)
+--                           , saveItem :: PartArg -> m (Part MutRes)
+--                           , saveInventoryItem :: InventoryPartArg -> m (InventoryItem MutRes)
                            , inventoryItems :: () -> MutRes () Handler (InventoryItems MutRes)
                            , items :: () -> MutRes () Handler (Items MutRes)
                            , inventories :: () -> MutRes () Handler (Inventories MutRes)

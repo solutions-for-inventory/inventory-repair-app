@@ -11,7 +11,7 @@
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE RecordWildCards       #-}
 
-module Graphql.Asset.Inventory.Resolvers (
+module Graphql.Inventory.Resolvers (
       inventoryResolver
     , getInventoryByIdResolver_
     , saveInventoryResolver
@@ -24,11 +24,11 @@ import Database.Persist.Sql (toSqlKey, fromSqlKey)
 import Prelude as P
 import qualified Data.Text as T
 import Graphql.Utils
-import Graphql.Asset.DataTypes
-import Graphql.Asset.Inventory.Persistence
-import Graphql.Asset.InventoryItem.Resolvers
-import Graphql.Asset.Item.Resolvers
-import Graphql.Asset.Inventory.Persistence ()
+import Graphql.DataTypes
+import Graphql.Inventory.Persistence
+import Graphql.InventoryPart.Resolvers
+import Graphql.Part.Resolvers
+import Graphql.Inventory.Persistence ()
 
 inventoryResolver :: (Applicative f, Typeable o,MonadTrans (o ())) => p -> f (Inventories o)
 inventoryResolver _ = pure Inventories { inventory = getInventoryByIdResolver

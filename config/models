@@ -164,9 +164,9 @@ Unit_ json sql=t_unit
     modifiedDate UTCTime Maybe
     deriving Typeable Show
 
-Part_ sql=t_item
-    Id sql=item_id
-    partNumber Text Maybe
+Part_ sql=t_part
+    Id sql=part_id
+    partNumber Text
     name Text
     defaultPrice Double
     description Text Maybe
@@ -176,6 +176,7 @@ Part_ sql=t_item
     notes Text Maybe
     status EntityStatus
     partCategoryId PartCategory_Id Maybe
+    parentId Part_Id Maybe
     unitId Unit_Id Maybe
     orgUnitId OrgUnit_Id
     createdDate UTCTime
@@ -196,7 +197,7 @@ InventoryPart_ sql=t_inventory_part
     inventoryId Inventory_Id
     createdDate UTCTime
     modifiedDate UTCTime Maybe
-    UniqueInventoryIdItemId inventoryId partId
+--    UniqueInventoryIdItemId inventoryId partId
     deriving Typeable Show
 
 Order_ sql=t_order
@@ -224,7 +225,7 @@ InventoryOrder_ sql=t_inventory_order
     subTotalPrice Double
     notes Text
     inventoryPartId InventoryPart_Id
-    oderId Order_Id
+    orderId Order_Id
     createdDate UTCTime
     modifiedDate UTCTime Maybe
     deriving Typeable Show
@@ -238,6 +239,10 @@ Payment_ sql=t_payment
     paymentFee          Double
     paymentDate         UTCTime
     transactionId       Text
+    currency            Text
+    comments            Text Maybe
+    paymentErrorCode    Text
+    paymentErrorMessage Text
     takenById           Person_Id
     orgUnitId           OrgUnit_Id
     createdDate         UTCTime

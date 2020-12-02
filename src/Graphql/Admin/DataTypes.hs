@@ -20,7 +20,7 @@ import GHC.Generics
 import Data.Morpheus.Kind (INPUT_OBJECT)
 import Data.Morpheus.Types (GQLType(..))
 import Graphql.Utils (Page, PageArg, EntityIdArg, EntityChangeStatusArg)
-import Graphql.Category
+import Graphql.PartCategory
 import Graphql.Admin.Privilege
 import Graphql.Admin.Role
 

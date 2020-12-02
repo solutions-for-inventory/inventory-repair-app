@@ -11,7 +11,7 @@
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE RecordWildCards       #-}
 
-module Graphql.Asset.Item.Resolvers (
+module Graphql.Part.Resolvers (
         itemResolver
       , getItemByIdResolver_
       , saveItemResolver
@@ -27,25 +27,25 @@ import Prelude as P
 import Graphql.Utils
 import Enums
 import Data.Time ()
-import Graphql.Category
-import Graphql.Asset.DataTypes
-import Graphql.Asset.InventoryItem.Resolvers
-import Graphql.Asset.Unit
-import Graphql.Asset.Item.Persistence
+import Graphql.PartCategory
+import Graphql.DataTypes
+import Graphql.InventoryPart.Resolvers
+import Graphql.Unit
+import Graphql.Part.Persistence
 
 -- Query Resolvers
-getItemByIdResolver :: forall (o :: * -> (* -> *) -> * -> *).(Typeable o, MonadTrans (o ())) => EntityIdArg -> o () Handler (Item o)
+getItemByIdResolver :: forall (o :: * -> (* -> *) -> * -> *).(Typeable o, MonadTrans (o ())) => EntityIdArg -> o () Handler (Part o)
 getItemByIdResolver EntityIdArg {..} = lift $ do
-                                              let itemId = (toSqlKey $ fromIntegral $ entityId)::Part_Id
-                                              item <- runDB $ getJustEntity itemId
+                                              let partId = (toSqlKey $ fromIntegral $ entityId)::Part_Id
+                                              item <- runDB $ getJustEntity partId
                                               return $ toItemQL item
 
-getItemByIdResolver_ :: forall (o :: * -> (* -> *) -> * -> *).(Typeable o, MonadTrans (o ())) => Part_Id -> () -> o () Handler (Item o)
-getItemByIdResolver_ itemId _ = lift $ do
-                                         item <- runDB $ getJustEntity itemId
+getItemByIdResolver_ :: forall (o :: * -> (* -> *) -> * -> *).(Typeable o, MonadTrans (o ())) => Part_Id -> () -> o () Handler (Part o)
+getItemByIdResolver_ partId _ = lift $ do
+                                         item <- runDB $ getJustEntity partId
                                          return $ toItemQL item
 
-itemsPageResolver :: (Typeable o, MonadTrans t, MonadTrans (o ())) => PageArg -> t Handler (Page (Item o))
+itemsPageResolver :: (Typeable o, MonadTrans t, MonadTrans (o ())) => PageArg -> t Handler (Page (Part o))
 itemsPageResolver page = lift $ do
                         countItems <- itemQueryCount page
                         result <- itemQuery page
@@ -67,7 +67,7 @@ itemsPageResolver page = lift $ do
                                           Just y -> y
                                           Nothing -> 10
 
-availableItemsPageResolver_ :: (Typeable o, MonadTrans t, MonadTrans (o ())) => Inventory_Id -> PageArg -> t (HandlerFor App) (Page (Item o))
+availableItemsPageResolver_ :: (Typeable o, MonadTrans t, MonadTrans (o ())) => Inventory_Id -> PageArg -> t (HandlerFor App) (Page (Part o))
 availableItemsPageResolver_ inventoryId page = lift $ do
                         countItems <- availableItemsQueryCount inventoryId page
                         result <- availableItemsQuery inventoryId page
@@ -99,7 +99,7 @@ itemResolver _ = pure Items { item = getItemByIdResolver
 -- itemResolver :: Items (Res () Handler)
 -- itemResolver = Items {  item = getItemByIdResolver, page = itemsPageResolver }
 
--- categoryResolver :: PartCategory_Id -> () -> Res e Handler Category
+-- categoryResolver :: PartCategory_Id -> () -> Res e Handler PartCategory
 --categoryResolver categoryId arg = lift $ do
 --                                      category <- dbFetchCategoryById categoryId
 --                                      return category
@@ -108,28 +108,26 @@ itemResolver _ = pure Items { item = getItemByIdResolver
 --                                      unit <- dbFetchUnitById unitId
 --                                      return unit
 
-toItemQL :: forall (o :: * -> (* -> *) -> * -> *).(Typeable o, MonadTrans (o ())) => Entity Part_ -> Item o
-toItemQL (Entity itemId item) = Item { itemId = fromIntegral $ fromSqlKey itemId
-                                     , code = item_Code
-                                     , name = item_Name
-                                     , defaultPrice = realToFrac item_DefaultPrice
-                                     , description = item_Description
-                                     , partNumber = item_PartNumber
-                                     , manufacturer = item_Manufacturer
-                                     , model = item_Model
-                                     , itemType = T.pack $ show item_ItemType
-                                     , notes = item_Notes
-                                     , status = T.pack $ show item_Status
-                                     , images = item_Images
-                                     , category = case item_CategoryId of Nothing -> Nothing; Just c -> Just $ getCategoryByIdResolver_ c
-                                     , unit = case item_UnitId of Nothing -> Nothing; Just u -> Just $ getUnitByIdResolver_ u
-                                     , inventoryItems = inventoryItemsItemPageResolver_ itemId
-                                     , createdDate = fromString $ show item_CreatedDate
+toItemQL :: forall (o :: * -> (* -> *) -> * -> *).(Typeable o, MonadTrans (o ())) => Entity Part_ -> Part o
+toItemQL (Entity partId item) = Part { partId = fromIntegral $ fromSqlKey partId
+                                     , partNumber = part_PartNumber
+                                     , name = part_Name
+                                     , defaultPrice = realToFrac part_DefaultPrice
+                                     , description = part_Description
+                                     , manufacturer = part_Manufacturer
+                                     , model = part_Model
+                                     , notes = part_Notes
+                                     , status = T.pack $ show part_Status
+                                     , images = part_Images
+                                     , partCategory = case part_PartCategoryId of Nothing -> Nothing; Just c -> Just $ getCategoryByIdResolver_ c
+                                     , unit = case part_UnitId of Nothing -> Nothing; Just u -> Just $ getUnitByIdResolver_ u
+                                     , inventoryItems = inventoryItemsItemPageResolver_ partId
+                                     , createdDate = fromString $ show part_CreatedDate
                                      , modifiedDate = m
                                      }
                             where
                               Part_ {..} = item
-                              m = case item_ModifiedDate of
+                              m = case part_ModifiedDate of
                                     Just d -> Just $ fromString $ show d
                                     Nothing -> Nothing
 
@@ -138,8 +136,8 @@ changeItemStatusResolver EntityChangeStatusArg {..} = lift $ do
                               () <- changeStatus entityIds (readEntityStatus status)
                               return True
 
-saveItemResolver :: (Typeable o, MonadTrans t, MonadTrans (o ())) => ItemArg -> t Handler (Item o)
+saveItemResolver :: (Typeable o, MonadTrans t, MonadTrans (o ())) => PartArg -> t Handler (Part o)
 saveItemResolver arg = lift $ do
-                              itemId <- createOrUpdateItem arg
-                              item <- runDB $ getJustEntity itemId
+                              partId <- createOrUpdateItem arg
+                              item <- runDB $ getJustEntity partId
                               return $ toItemQL item
