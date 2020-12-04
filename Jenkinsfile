@@ -25,7 +25,7 @@ pipeline {
             }
         }
         stage('DockerBuildImage') {
-            when { branch 'release-1.0' }
+//            when { branch 'release-1.0' }
             steps {
                 echo 'Starting to build docker image'
                 script {
