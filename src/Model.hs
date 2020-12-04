@@ -23,3 +23,6 @@ import Enums
 -- http://www.yesodweb.com/book/persistent/
 share [mkPersist sqlSettings, mkMigrate "migrateAll"]
     $(persistFileWith lowerCaseSettings "config/models")
+
+--share [mkPersist sqlSettings]
+--    $(persistFileWith lowerCaseSettings "config/models")

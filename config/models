@@ -73,7 +73,6 @@ Privilege_ json sql=t_privilege
 User_ sql=t_user
     userId Person_Id
     Primary userId
-    Id sql=user_id
     username Text
     email Text
     password Text
@@ -90,7 +89,6 @@ User_ sql=t_user
 Customer_ sql=t_customer
     customerId Person_Id
     Primary customerId
-    Id sql=customer_id
     status EntityStatus
     locale Text
     createdDate UTCTime
