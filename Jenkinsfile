@@ -39,7 +39,7 @@ pipeline {
             }
         }
         stage('Deploy') {
-            when { branch 'release-1.0' }
+//            when { branch 'release-1.0' }
             steps {
                 echo 'Deploying....'
                 script {
