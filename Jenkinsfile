@@ -20,6 +20,7 @@ pipeline {
         }
         stage('Build') {
             steps {
+                sh 'mkdir webapps/dist'
                 sh 'stack build --copy-bins --local-bin-path target'
             }
         }
@@ -50,10 +51,10 @@ pipeline {
                         + '-e YESOD_PGHOST=192.168.0.100 '
                         + '-e OAUTH2_CLIENT_ID=app '
                         + '-e OAUTH2_SECRET=appsecret '
-                        + '-e OAUTH2_AUTHORIZE=http://192.168.0.100:4200/oauth/authorize '
-                        + '-e OAUTH2_ACCESS_TOKEN=http://192.168.0.100:4200/oauth/token '
-                        + '-e OAUTH2_USER_INFO=http://192.168.0.100:4200/connect/userinfo '
-                        + '-e OAUTH2_LOGOUT=http://192.168.0.100:4200/logout '
+                        + '-e OAUTH2_AUTHORIZE=http://192.168.0.100:3001/oauth/authorize '
+                        + '-e OAUTH2_ACCESS_TOKEN=http://192.168.0.100:3001/oauth/token '
+                        + '-e OAUTH2_USER_INFO=http://192.168.0.100:3001/connect/userinfo '
+                        + '-e OAUTH2_LOGOUT=http://192.168.0.100:3001/logout '
                         + '-e OAUTH2_SCOPES=openid'
                     )
                 }
