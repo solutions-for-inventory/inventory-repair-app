@@ -20,7 +20,7 @@ pipeline {
         }
         stage('Build') {
             steps {
-                sh 'mkdir webapps/dist'
+                sh 'mkdir -p webapps/dist'
                 sh 'stack build --copy-bins --local-bin-path target'
             }
         }
