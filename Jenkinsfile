@@ -7,7 +7,7 @@ pipeline {
 
     stages {
         stage('CleanOldBinary') {
-            when { branch 'release-1.0' }
+//            when { branch 'release-1.0' }
             steps {
                catchError {
                  sh 'rm -rf webapps/dist'
