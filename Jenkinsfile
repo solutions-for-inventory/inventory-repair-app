@@ -12,8 +12,8 @@ pipeline {
                catchError {
                  sh 'rm -rf webapps/dist'
 //                 sh 'rm -rf .stack-work'
-                 sh 'docker stop inventory-repair-app:1.0'
-                 sh 'docker rm inventory-repair-app:1.0'
+                 sh 'docker stop inventory-repair-app'
+                 sh 'docker rm inventory-repair-app'
 //                 sh 'docker images -a | grep "inventory-repair-app" | awk \'{print $3}\' | xargs docker rmi'
                }
             }
