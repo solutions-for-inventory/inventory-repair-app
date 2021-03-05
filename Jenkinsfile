@@ -10,10 +10,10 @@ pipeline {
 //            when { branch 'release-1.0' }
             steps {
                catchError {
-                 sh 'rm -rf webapps/dist'
+//                 sh 'rm -rf webapps/dist'
 //                 sh 'rm -rf .stack-work'
-                 sh 'docker stop inventory-repair-app'
-                 sh 'docker rm inventory-repair-app'
+//                 sh 'docker stop inventory-repair-app'
+//                 sh 'docker rm inventory-repair-app'
 //                 sh 'docker images -a | grep "inventory-repair-app" | awk \'{print $3}\' | xargs docker rmi'
                }
             }
@@ -29,7 +29,7 @@ pipeline {
             steps {
                 echo 'Starting to build docker image'
                 script {
-                    def customImage = docker.build("inventory-repair-app:1.0")
+                    def customImage = docker.build("inventory/repair-app:1.0")
                 }
             }
         }
@@ -38,6 +38,7 @@ pipeline {
                 echo 'Testing..'
             }
         }
+        /*
         stage('Deploy') {
 //            when { branch 'release-1.0' }
             steps {
@@ -60,5 +61,6 @@ pipeline {
                 }
             }
         }
+        */
     }
 }
