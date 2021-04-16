@@ -53,7 +53,7 @@ stack test --flag inventory-repair-app:library-only --flag inventory-repair-app:
 	* [Functional Programming Slack](https://fpchat-invite.herokuapp.com/), in the #haskell, #haskell-beginners, or #yesod channels.
 
 ## Build Project
-stack build --extra-include-dirs="C:/Program Files/PostgreSQL/9.6/include" --extra-lib-dirs="C:/Program Files/PostgreSQL/9.6/lib"
+stack build --extra-include-dirs="C:/pgsql/include" --extra-lib-dirs="C:/pgsql/lib"
 
 set binary
 stack build --copy-bins --local-bin-path ~/outputpath

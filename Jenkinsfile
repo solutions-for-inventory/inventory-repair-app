@@ -29,7 +29,7 @@ pipeline {
             steps {
                 echo 'Starting to build docker image'
                 script {
-                    def customImage = docker.build("inventory/repair-app:1.0")
+                    def customImage = docker.build("inventory-repair-app:1.0")
                 }
             }
         }
@@ -62,5 +62,12 @@ pipeline {
             }
         }
         */
+        stage('push docker image') {
+            steps {
+                sh 'echo $CR_PAT | docker login ghcr.io -u USERNAME --password-stdin'
+                sh 'docker image tag inventory-repair-app:1.0 ghcr.io/solutions-for-inventory/inventory-repair-app:1.0'
+                sh 'docker push ghcr.io/solutions-for-inventory/inventory-repair-app:1.0'
+            }
+        }
     }
 }
