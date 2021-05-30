@@ -41,7 +41,7 @@ data Unit = Unit { unitId :: Int
 data UnitArg = UnitArg { unitId :: Int
                        , key :: Text
                        , label :: Text
-                       } deriving (Generic)
+                       } deriving (Generic, GQLType)
 
 -- DB ACTIONS
 dbFetchUnitById:: Unit_Id -> Handler Unit

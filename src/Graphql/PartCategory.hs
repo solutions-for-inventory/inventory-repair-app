@@ -46,9 +46,9 @@ data PartCategoryArg = PartCategoryArg { categoryId :: Int
                                        , scope :: Text
                                        , description :: Text
                                        , orgUnitId :: Int
-                                       } deriving (Generic)
+                                       } deriving (Generic, GQLType)
 
-data PartCategoryFilter = PartCategoryFilter { orgUnitId :: Int, scope :: Text } deriving (Generic)
+data PartCategoryFilter = PartCategoryFilter { orgUnitId :: Int, scope :: Text } deriving (Generic, GQLType)
 -- DB ACTIONS
 
 getCategoryByIdResolver_ :: (MonadTrans t) => PartCategory_Id -> () -> t Handler PartCategory

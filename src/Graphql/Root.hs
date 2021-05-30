@@ -18,7 +18,7 @@ module Graphql.Root (api, apiDoc) where
 import           GHC.Generics
 import           Data.Morpheus              (interpreter)
 import           Data.Morpheus.Document     ()
-import           Data.Morpheus.Types        (GQLRootResolver (..), GQLType(..), Undefined(..), Res, MutRes, GQLRequest, GQLResponse)
+import           Data.Morpheus.Types        (RootResolver (..), GQLType(..), Undefined(..), Res, MutRes, GQLRequest, GQLResponse)
 import           Data.Morpheus.Document (toGraphQLDocument)
 import           Import
 import           Data.ByteString.Lazy.Internal (ByteString)
@@ -117,8 +117,8 @@ resolveMutation = Mutation { savePrivilege = resolveSavePrivilege
 --testsResolver :: TestArg -> Res e Handler NoDeity
 --testsResolver TestArg {yourFullName } = pure NoDeity {noFullName = "Test no full am", nopower = Just "no power"}
 
-rootResolver :: GQLRootResolver Handler () QueryQL Mutation Undefined
-rootResolver = GQLRootResolver { queryResolver = resolveQuery
+rootResolver :: RootResolver Handler () QueryQL Mutation Undefined
+rootResolver = RootResolver { queryResolver = resolveQuery
                                , mutationResolver = resolveMutation
                                , subscriptionResolver = Undefined
                                }

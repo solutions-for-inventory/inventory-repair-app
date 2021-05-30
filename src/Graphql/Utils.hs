@@ -43,7 +43,7 @@ data Page a = Page { totalCount :: Int
 --                   , sort :: Sort
                    } deriving (Generic, GQLType)
 
-data EntityArg a = EntityArg { arg :: a } deriving (Generic, GQLType)
+data EntityArg a = EntityArg { arg :: a } deriving (Generic)
 
 data EntityChangeStatusArg = EntityChangeStatusArg { entityIds :: [Int]
                                                    , status :: Text
@@ -57,9 +57,9 @@ data PageArg = PageArg { searchString :: Maybe Text
                        , pageIndex :: Maybe Int
                        , pageSize :: Maybe Int
                        , filters :: Maybe [Predicate]
-                       } deriving (Generic)
+                       } deriving (Generic, GQLType)
 
-data EntityIdArg = EntityIdArg { entityId :: Int } deriving (Generic)
+data EntityIdArg = EntityIdArg { entityId :: Int } deriving (Generic, GQLType)
 
 data EntityIdsArg = EntityIdsArg { entityIds :: [Int] } deriving (Generic)
 

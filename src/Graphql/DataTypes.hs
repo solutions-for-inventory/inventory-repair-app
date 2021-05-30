@@ -46,7 +46,7 @@ data InventoryArg = InventoryArg { inventoryId :: Int
                                  , allowNegativeStocks :: Bool
                                  , status :: Text
                                  , orgUnitId :: Int
-                                 } deriving (Generic)
+                                 } deriving (Generic, GQLType)
 
 data InventoryItem o = InventoryItem { inventoryItemId :: Int
                                      , status :: Text

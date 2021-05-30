@@ -128,8 +128,8 @@ data Users o = Users { user :: EntityIdArg -> o () Handler (User o)
                      , updatePassword :: UpdatePasswordArg -> o () Handler Bool
                      } deriving (Generic, GQLType)
 
-data ChangePasswordArg = ChangePasswordArg { userId:: Int, password :: Text, newPassword :: Text} deriving (Generic)
-data UpdatePasswordArg = UpdatePasswordArg { userId:: Int, password :: Text } deriving (Generic)
+data ChangePasswordArg = ChangePasswordArg { userId:: Int, password :: Text, newPassword :: Text} deriving (Generic, GQLType)
+data UpdatePasswordArg = UpdatePasswordArg { userId:: Int, password :: Text } deriving (Generic, GQLType)
 -- User Graphql Arguments
 data UserArg = UserArg { userId :: Int
                        , username :: Text
@@ -141,7 +141,7 @@ data UserArg = UserArg { userId :: Int
                        , orgUnitId :: Int
                        , roleIds :: [Int]
                        , privilegeIds :: [Int]
-                       } deriving (Generic)
+                       } deriving (Generic, GQLType)
 
 --data UserRoleArg = UserRoleArg {roleIds :: Maybe [Int]} deriving (Generic, GQLType)
 --data UserPrivilegeArg = UserPrivilegeArg { privilegeIds :: Maybe [Int]} deriving (Generic, GQLType)

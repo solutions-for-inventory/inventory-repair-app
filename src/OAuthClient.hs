@@ -27,7 +27,7 @@ oauth2Client Oauth2Config {..} =
                    }
   where
     oauth2 = OAuth2 { oauthClientId = clientId
-                    , oauthClientSecret = clientSecret
+                    , oauthClientSecret = Just clientSecret
                     , oauthOAuthorizeEndpoint = authorizeEndpoint `withQuery` [ scopeParam "," (T.splitOn "," scopes) ]
                     , oauthAccessTokenEndpoint = accessTokenEndpoint
                     , oauthCallback = Nothing
