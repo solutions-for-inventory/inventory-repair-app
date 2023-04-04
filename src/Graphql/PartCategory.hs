@@ -76,7 +76,7 @@ createOrUpdateCategory category = do
                                   let categoryKey = (toSqlKey $ fromIntegral $ categoryId)::PartCategory_Id
                                   _ <- runDB $ update categoryKey [ PartCategory_Name =. name
                                                                   , PartCategory_Description =. description
-                                                                  , PartCategory_Key =. key
+                                                                  , PartCategory_Tag =. key
                                                                   , PartCategory_ModifiedDate =. Just now
                                                                   ]
                                   return categoryKey
@@ -89,7 +89,7 @@ createOrUpdateCategory category = do
 toCategoryQL :: Entity PartCategory_ -> PartCategory
 toCategoryQL (Entity categoryId category) = PartCategory { categoryId = fromIntegral $ fromSqlKey categoryId
                                                      , name = partCategory_Name
-                                                     , key = partCategory_Key
+                                                     , key = partCategory_Tag
                                                      , description = partCategory_Description
                                                      , createdDate = fromString $ show partCategory_CreatedDate
                                                      , modifiedDate = m
@@ -102,7 +102,7 @@ toCategoryQL (Entity categoryId category) = PartCategory { categoryId = fromInte
 
 fromCategoryQL :: PartCategoryArg -> UTCTime -> Maybe UTCTime -> PartCategory_
 fromCategoryQL (PartCategoryArg {..}) cd md = PartCategory_ { partCategory_Name = name
-                                                        , partCategory_Key = key
+                                                        , partCategory_Tag = key
                                                         , partCategory_ParentId = Nothing
                                                         , partCategory_Description = description
                                                         , partCategory_CreatedDate = cd

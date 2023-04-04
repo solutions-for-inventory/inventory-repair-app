@@ -57,15 +57,20 @@ instance ToBackendKey SqlBackend Privilege_ where
 
 instance ToBackendKey SqlBackend PartCategory_ where
   toBackendKey = unPartCategory_Key
+  fromBackendKey = PartCategory_Key
 
 instance ToBackendKey SqlBackend OrgUnit_ where
   toBackendKey = unOrgUnit_Key
+  fromBackendKey = OrgUnit_Key
 
 instance ToBackendKey SqlBackend Part_ where
   toBackendKey = unPart_Key
+  fromBackendKey = Part_Key
 
 instance ToBackendKey SqlBackend Inventory_ where
   toBackendKey = unInventory_Key
+  fromBackendKey = Inventory_Key
 
 instance ToBackendKey SqlBackend InventoryPart_ where
   toBackendKey = unInventoryPart_Key
+  fromBackendKey = InventoryPart_Key

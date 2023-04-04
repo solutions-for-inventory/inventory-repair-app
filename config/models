@@ -135,7 +135,7 @@ UserPrivilege_ json sql=t_user_privilege
 PartCategory_ sql=t_part_category
     Id sql=part_category_id
     name Text
-    key Text Maybe
+    tag Text Maybe
     description Text
     parentId PartCategory_Id Maybe
     createdDate UTCTime
