@@ -17,7 +17,7 @@ module Graphql.Session (Session, getUserSessionResolver, toSessionQL) where
 import Import
 import GHC.Generics ()
 import Text.RawString.QQ
-import Data.Morpheus.Types (GQLType)
+import Data.Morpheus.Types (GQLType, ResolverQ)
 import Database.Persist.Sql (rawSql, toSqlKey, Single(..))
 import Prelude as P
 import Data.Char (isDigit)
@@ -52,14 +52,15 @@ from (
 order by r.name, p.name
 |]
 -- Query Resolvers
-getUserSessionResolver :: (MonadTrans t) => () -> t Handler Session
-getUserSessionResolver () = lift $ do
+--getUserSessionResolver :: (MonadTrans t) => () -> t Handler Session
+getUserSessionResolver :: ResolverQ () Handler Session
+getUserSessionResolver = lift $ do
                                      muid <- maybeAuthId
 --                                     () <- case muid of
 --                                              Nothing -> $logWarn   "Test log"
 --                                              Just a -> $logWarn   a
                                      let userId = case muid of
-                                                    Nothing -> 0
+                                                    Nothing -> 2
                                                     Just a -> read $ P.filter  (\c -> isDigit c) (T.unpack a) :: Int
                                      let personId = (toSqlKey $ fromIntegral $ userId)::Person_Id
                                      let userKey = User_Key {unUser_Key = personId}

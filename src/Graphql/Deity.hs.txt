@@ -12,7 +12,7 @@ module Graphql.Deity
   ) where
 
 import           Data.Morpheus.Kind     (OBJECT)
-import           Data.Morpheus.Types    (GQLType (..), lift, Res)
+import           Data.Morpheus.Types    (GQLType (..), lift, QUERY)
 import           Data.Text              (Text)
 import           GHC.Generics           (Generic)
 import           Database.Persist.Sql (toSqlKey, fromSqlKey)
@@ -32,7 +32,7 @@ data TestArg = TestArg { yourFullName :: Text } deriving (Generic)
 data Deity = Deity
   { fullName :: Text -- Non-Nullable Field
   , power    :: Maybe Text -- Nullable Field
-  , tests :: TestArg -> Res () Handler NoDeity
+  , tests :: TestArg -> QUERY () Handler NoDeity
   } deriving (Generic)
 
 instance GQLType Deity where

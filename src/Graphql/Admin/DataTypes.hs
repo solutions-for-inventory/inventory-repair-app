@@ -17,7 +17,6 @@ module Graphql.Admin.DataTypes where
 
 import Import
 import GHC.Generics
-import Data.Morpheus.Kind (INPUT_OBJECT)
 import Data.Morpheus.Types (GQLType(..))
 import Graphql.Utils (Page, PageArg, EntityIdArg, EntityChangeStatusArg)
 import Graphql.PartCategory
@@ -26,21 +25,21 @@ import Graphql.Admin.Role
 
 
 -- PERSON DATA TYPES
-data Person o = Person { personId :: Int
+data Person m = Person { personId :: Int
                        , firstName :: Text
                        , lastName :: Text
                        , documentType :: Text
                        , documentId :: Text
                        , createdDate :: Text
                        , modifiedDate :: Maybe Text
-                       , address :: () -> o () Handler (Maybe Address)
-                       , contactInfo :: () -> o () Handler [ContactInfo]
+                       , address :: m (Maybe Address)
+                       , contactInfo :: m [ContactInfo]
 --                       , user :: Maybe (() -> o () Handler (User o))
                        } deriving (Generic, GQLType)
 
-data Persons o = Persons { person :: EntityIdArg -> o () Handler (Person o)
-                         , page :: PageArg -> o () Handler (Page (Person o))
-                         , createUpdatePerson :: PersonArg -> o () Handler (Person o)
+data Persons m = Persons { person :: EntityIdArg -> m (Person m)
+                         , page :: PageArg -> m (Page (Person m))
+                         , createUpdatePerson :: PersonArg -> m (Person m)
                          } deriving (Generic, GQLType)
 
 data ContactInfo = ContactInfo { contactId :: Int
@@ -75,11 +74,7 @@ data PersonArg = PersonArg { personId :: Int
                            , contactInfo :: [ContactInfoArg]
                            , orgUnitId :: Int
 --                           , user :: Maybe UserArg
-                           } deriving (Generic)
-
-instance GQLType PersonArg where
-    type  KIND PersonArg = INPUT_OBJECT
-    description = const $ Just $ pack "The item that holds the person information"
+                           } deriving (Generic, GQLType)
 
 data AddressArg = AddressArg { addressId :: Int
                              , street1 :: Text
@@ -89,47 +84,39 @@ data AddressArg = AddressArg { addressId :: Int
                              , city :: Text
                              , state :: Text
                              , country :: Text
-                             } deriving (Generic)
-
-instance GQLType AddressArg where
-    type  KIND AddressArg = INPUT_OBJECT
-    description = const $ Just $ pack "The item that holds the address information"
+                             } deriving (Generic, GQLType)
 
 data ContactInfoArg = ContactInfoArg { contactId :: Int
                                      , contact :: Text
                                      , contactType :: Text
-                                     } deriving (Generic)
-
-instance GQLType ContactInfoArg where
-    type  KIND ContactInfoArg = INPUT_OBJECT
-    description = const $ Just $ pack "The item that holds the contact Info information"
-
+                                     } deriving (Generic, GQLType)
 
 -- USER DATA TYPES
-data User o = User { userId :: Int
+data User m = User { userId :: Int
                    , username :: Text
                    , email :: Text
                    , status :: Text
                    , locale :: Text
                    , expiration :: Bool
                    , newPasswordRequired :: Bool
-                   , person :: () -> o () Handler (Person o)
-                   , roles :: () -> o () Handler [Role o]
-                   , privileges :: () -> o () Handler [Privilege]
+                   , person :: m (Person m)
+                   , roles :: m [Role m]
+                   , privileges :: m [Privilege]
                    , createdDate :: Text
                    , modifiedDate :: Maybe Text
                    } deriving (Generic, GQLType)
 
-data Users o = Users { user :: EntityIdArg -> o () Handler (User o)
-                     , page :: PageArg -> o () Handler (Page (User o))
-                     , createUpdateUser :: UserArg -> o () Handler (User o)
-                     , resetPassword :: EntityIdArg -> o () Handler Text
-                     , changePassword :: ChangePasswordArg -> o () Handler Bool
-                     , updatePassword :: UpdatePasswordArg -> o () Handler Bool
+data Users m = Users { user :: EntityIdArg -> m (User m)
+                     , page :: PageArg -> m (Page (User m))
+                     , createUpdateUser :: UserArg -> m (User m)
+                     , resetPassword :: EntityIdArg -> m Text
+                     , changePassword :: ChangePasswordArg -> m Bool
+                     , updatePassword :: UpdatePasswordArg -> m Bool
                      } deriving (Generic, GQLType)
 
 data ChangePasswordArg = ChangePasswordArg { userId:: Int, password :: Text, newPassword :: Text} deriving (Generic, GQLType)
 data UpdatePasswordArg = UpdatePasswordArg { userId:: Int, password :: Text } deriving (Generic, GQLType)
+
 -- User Graphql Arguments
 data UserArg = UserArg { userId :: Int
                        , username :: Text
@@ -142,6 +129,3 @@ data UserArg = UserArg { userId :: Int
                        , roleIds :: [Int]
                        , privilegeIds :: [Int]
                        } deriving (Generic, GQLType)
-
---data UserRoleArg = UserRoleArg {roleIds :: Maybe [Int]} deriving (Generic, GQLType)
---data UserPrivilegeArg = UserPrivilegeArg { privilegeIds :: Maybe [Int]} deriving (Generic, GQLType)

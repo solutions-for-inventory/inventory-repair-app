@@ -17,7 +17,7 @@
 #
 # resolver: ./custom-snapshot.yaml
 # resolver: https://example.com/snapshots/2018-01-01.yaml
-resolver: lts-17.13
+resolver: lts-20.16
 #allow-newer: true
 # User packages to be built.
 # Various formats can be used as shown in the example below.
@@ -37,7 +37,7 @@ packages:
 extra-deps:
 # - morpheus-graphql-0.10.0
 # - yesod-auth-oauth2-0.6.3.4
- - classy-prelude-yesod-1.5.0
+# - classy-prelude-yesod-1.5.0
 
 # - acme-missiles-0.3
 # - git: https://github.com/commercialhaskell/stack.git

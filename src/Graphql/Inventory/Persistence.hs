@@ -19,12 +19,12 @@ import Enums
 import Graphql.DataTypes
 
 -- DB ACTIONS
---dbFetchInventoryById:: Inventory_Id -> Handler (Inventory Res)
+--dbFetchInventoryById:: Inventory_Id -> Handler (Inventory QUERY)
 --dbFetchInventoryById inventoryId = do
 --                                      inventory <- runDB $ getJustEntity inventoryId
 --                                      return $ toInventoryQL inventory
 
---dbFetchInventories:: Handler [Inventory Res]
+--dbFetchInventories:: Handler [Inventory QUERY]
 --dbFetchInventories = do
 --                       inventories <- runDB $ selectList ([] :: [Filter Inventory_]) []
 --                       return $ P.map toInventoryQL inventories

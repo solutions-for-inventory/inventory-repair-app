@@ -52,7 +52,7 @@ ContactInfo_ json sql=t_contact_info
 
 Role_ json sql=t_role
     Id sql=role_id
-    key Text
+    tag Text
     name Text
     description Text Maybe
     active Bool
@@ -62,7 +62,7 @@ Role_ json sql=t_role
 
 Privilege_ json sql=t_privilege
     Id sql=privilege_id
-    key Text
+    tag Text
     name Text
     description Text Maybe
     active Bool
@@ -156,7 +156,7 @@ Inventory_ sql=t_inventory
 
 Unit_ json sql=t_unit
     Id sql=unit_id
-    key Text
+    tag Text
     label Text
     createdDate UTCTime
     modifiedDate UTCTime Maybe

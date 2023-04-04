@@ -34,18 +34,18 @@ import Graphql.Unit
 import Graphql.Part.Persistence
 
 -- Query Resolvers
-getItemByIdResolver :: forall (o :: * -> (* -> *) -> * -> *).(Typeable o, MonadTrans (o ())) => EntityIdArg -> o () Handler (Part o)
+--getItemByIdResolver :: forall (o :: * -> (* -> *) -> * -> *).(Typeable o, MonadTrans (o ())) => EntityIdArg -> o () Handler (Part o)
 getItemByIdResolver EntityIdArg {..} = lift $ do
                                               let partId = (toSqlKey $ fromIntegral $ entityId)::Part_Id
                                               item <- runDB $ getJustEntity partId
                                               return $ toItemQL item
 
-getItemByIdResolver_ :: forall (o :: * -> (* -> *) -> * -> *).(Typeable o, MonadTrans (o ())) => Part_Id -> () -> o () Handler (Part o)
-getItemByIdResolver_ partId _ = lift $ do
+--forall (o :: * -> (* -> *) -> * -> *).(Typeable o, MonadTrans (o ())) => Part_Id -> o (Part o)
+getItemByIdResolver_ partId = lift $ do
                                          item <- runDB $ getJustEntity partId
                                          return $ toItemQL item
 
-itemsPageResolver :: (Typeable o, MonadTrans t, MonadTrans (o ())) => PageArg -> t Handler (Page (Part o))
+--itemsPageResolver :: (Typeable o, MonadTrans t, MonadTrans (o ())) => PageArg -> t Handler (Page (Part o))
 itemsPageResolver page = lift $ do
                         countItems <- itemQueryCount page
                         result <- itemQuery page
@@ -67,7 +67,7 @@ itemsPageResolver page = lift $ do
                                           Just y -> y
                                           Nothing -> 10
 
-availableItemsPageResolver_ :: (Typeable o, MonadTrans t, MonadTrans (o ())) => Inventory_Id -> PageArg -> t (HandlerFor App) (Page (Part o))
+--availableItemsPageResolver_ :: (Typeable o, MonadTrans t, MonadTrans (o ())) => Inventory_Id -> PageArg -> t (HandlerFor App) (Page (Part o))
 availableItemsPageResolver_ inventoryId page = lift $ do
                         countItems <- availableItemsQueryCount inventoryId page
                         result <- availableItemsQuery inventoryId page
@@ -89,17 +89,17 @@ availableItemsPageResolver_ inventoryId page = lift $ do
                                             Just y -> y
                                             Nothing -> 10
 
-itemResolver :: (Applicative f, Typeable o, MonadTrans (o ())) => p -> f (Items o)
+--itemResolver :: (Applicative f, Typeable o, MonadTrans (o ())) => p -> f (Items o)
 itemResolver _ = pure Items { item = getItemByIdResolver
                             , page = itemsPageResolver
                             , saveItem = saveItemResolver
                             , changeItemStatus = changeItemStatusResolver
                             }
 
--- itemResolver :: Items (Res () Handler)
+-- itemResolver :: Items (QUERY () Handler)
 -- itemResolver = Items {  item = getItemByIdResolver, page = itemsPageResolver }
 
--- categoryResolver :: PartCategory_Id -> () -> Res e Handler PartCategory
+-- categoryResolver :: PartCategory_Id -> () -> QUERY e Handler PartCategory
 --categoryResolver categoryId arg = lift $ do
 --                                      category <- dbFetchCategoryById categoryId
 --                                      return category
@@ -108,7 +108,7 @@ itemResolver _ = pure Items { item = getItemByIdResolver
 --                                      unit <- dbFetchUnitById unitId
 --                                      return unit
 
-toItemQL :: forall (o :: * -> (* -> *) -> * -> *).(Typeable o, MonadTrans (o ())) => Entity Part_ -> Part o
+--toItemQL :: forall {m :: * -> *}. Entity Part_ -> Part m
 toItemQL (Entity partId item) = Part { partId = fromIntegral $ fromSqlKey partId
                                      , partNumber = part_PartNumber
                                      , name = part_Name
@@ -136,7 +136,7 @@ changeItemStatusResolver EntityChangeStatusArg {..} = lift $ do
                               () <- changeStatus entityIds (readEntityStatus status)
                               return True
 
-saveItemResolver :: (Typeable o, MonadTrans t, MonadTrans (o ())) => PartArg -> t Handler (Part o)
+--saveItemResolver :: (Typeable o, MonadTrans t, MonadTrans (o ())) => PartArg -> t Handler (Part o)
 saveItemResolver arg = lift $ do
                               partId <- createOrUpdateItem arg
                               item <- runDB $ getJustEntity partId

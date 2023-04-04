@@ -26,11 +26,11 @@ oauth2Client Oauth2Config {..} =
                    , credsExtra = setExtra token userResponse
                    }
   where
-    oauth2 = OAuth2 { oauthClientId = clientId
-                    , oauthClientSecret = Just clientSecret
-                    , oauthOAuthorizeEndpoint = authorizeEndpoint `withQuery` [ scopeParam "," (T.splitOn "," scopes) ]
-                    , oauthAccessTokenEndpoint = accessTokenEndpoint
-                    , oauthCallback = Nothing
+    oauth2 = OAuth2 { oauth2ClientId = clientId
+                    , oauth2ClientSecret = Just clientSecret
+                    , oauth2AuthorizeEndpoint = authorizeEndpoint `withQuery` [ scopeParam "," (T.splitOn "," scopes) ]
+                    , oauth2TokenEndpoint = accessTokenEndpoint
+                    , oauth2RedirectUri = Nothing
                     }
 
 {--

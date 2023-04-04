@@ -48,20 +48,20 @@ data PartCategoryArg = PartCategoryArg { categoryId :: Int
                                        , orgUnitId :: Int
                                        } deriving (Generic, GQLType)
 
-data PartCategoryFilter = PartCategoryFilter { orgUnitId :: Int, scope :: Text } deriving (Generic, GQLType)
+data PartCategoryFilter = PartCategoryFilter { orgUnitId :: Maybe Int, scope :: Maybe Text } deriving (Generic, GQLType)
 -- DB ACTIONS
 
-getCategoryByIdResolver_ :: (MonadTrans t) => PartCategory_Id -> () -> t Handler PartCategory
-getCategoryByIdResolver_ categoryId _ = lift $ do
+--getCategoryByIdResolver_ :: (MonadTrans t) => PartCategory_Id -> () -> t Handler PartCategory
+getCategoryByIdResolver_ categoryId = lift $ do
                                       category <- runDB $ getJustEntity categoryId
                                       return $ toCategoryQL category
 
-listCategoryResolver :: (MonadTrans t) => PartCategoryFilter -> t Handler [PartCategory]
+--listCategoryResolver :: (MonadTrans t) => PartCategoryFilter -> t Handler [PartCategory]
 listCategoryResolver (PartCategoryFilter {..}) = lift $ do
                       categories <- runDB $ selectList [] []
                       return $ P.map toCategoryQL categories
 
-saveCategoryResolver :: (MonadTrans t) => PartCategoryArg -> t Handler PartCategory
+--saveCategoryResolver :: (MonadTrans t) => PartCategoryArg -> t Handler PartCategory
 saveCategoryResolver arg = lift $ do
                         categoryId <- createOrUpdateCategory arg
                         category <- runDB $ getJustEntity categoryId

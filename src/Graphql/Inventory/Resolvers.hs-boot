@@ -21,5 +21,11 @@ module Graphql.Inventory.Resolvers (
 import Import
 import Graphql.DataTypes
 
-getInventoryByIdResolver_ :: forall (o :: * -> (* -> *) -> * -> *).(Typeable o, MonadTrans (o ())) => Inventory_Id -> () -> o () Handler (Inventory o)
+getInventoryByIdResolver_ ::
+                   forall {site} {t :: (* -> *) -> * -> *} {t1 :: (* -> *) -> * -> *}.
+                   (BaseBackend (YesodPersistBackend site) ~ SqlBackend,
+                    YesodPersist site, PersistStoreRead (YesodPersistBackend site),
+                    MonadTrans t, MonadTrans t1) =>
+                   Key Inventory_
+                   -> t (HandlerFor site) (Inventory (t1 (HandlerFor App)))
 --toInventoryQL :: forall (o :: * -> (* -> *) -> * -> *).(Typeable o, MonadTrans (o ())) => Entity Inventory_ -> Inventory o

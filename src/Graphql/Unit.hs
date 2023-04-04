@@ -11,6 +11,9 @@
 {-# LANGUAGE QuasiQuotes           #-}
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE RecordWildCards       #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE DataKinds #-}
 
 module Graphql.Unit (
     Unit
@@ -24,8 +27,8 @@ module Graphql.Unit (
 
 import Import
 import GHC.Generics
-import Data.Morpheus.Kind (INPUT_OBJECT)
-import Data.Morpheus.Types (GQLType, lift, Res, MutRes)
+--import Data.Morpheus.Kind (INPUT_OBJECT)
+import Data.Morpheus.Types (GQLType, lift, QUERY, MUTATION)
 import Database.Persist.Sql (toSqlKey, fromSqlKey)
 import Prelude as P
 import Graphql.Utils
@@ -49,8 +52,8 @@ dbFetchUnitById unitId = do
                           unit <- runDB $ getJustEntity unitId
                           return $ toUnitQL unit
 
-getUnitByIdResolver_ :: forall (o :: * -> (* -> *) -> * -> *).(Typeable o, MonadTrans (o ())) => Unit_Id -> () -> o () Handler Unit
-getUnitByIdResolver_ unitId _ = lift $ do
+--getUnitByIdResolver_ :: forall (o :: * -> (* -> *) -> * -> *).(Typeable o, MonadTrans (o ())) => Unit_Id -> o () Handler Unit
+getUnitByIdResolver_ unitId = lift $ do
                                       unit <- dbFetchUnitById unitId
                                       return unit
 
@@ -59,12 +62,12 @@ dbFetchUnits = do
                 units <- runDB $ selectList [] []
                 return $ P.map toUnitQL units
 
-listUnitResolver :: () -> Res e Handler [Unit]
+--listUnitResolver :: () -> Res e Handler [Unit]
 listUnitResolver _ = lift $ dbFetchUnits
 
 -- Mutation
 
-saveUnitResolver :: UnitArg -> MutRes e Handler Unit
+--saveUnitResolver :: UnitArg -> MutRes e Handler Unit
 saveUnitResolver arg = lift $ createOrUpdateUnit arg
 
 createOrUpdateUnit :: UnitArg -> Handler Unit
@@ -74,7 +77,7 @@ createOrUpdateUnit unit = do
                 entityId <- if unitId > 0 then
                                 do
                                   let unitKey = (toSqlKey $ fromIntegral $ unitId)::Unit_Id
-                                  _ <- runDB $ update unitKey [ Unit_Key =. key
+                                  _ <- runDB $ update unitKey [ Unit_Tag =. key
                                                               , Unit_Label =. label
                                                               , Unit_ModifiedDate =. Just now
                                                               ]
@@ -88,7 +91,7 @@ createOrUpdateUnit unit = do
 -- CONVERTERS
 toUnitQL :: Entity Unit_ -> Unit
 toUnitQL (Entity unitId unit) = Unit { unitId = fromIntegral $ fromSqlKey unitId
-                                     , key = unit_Key
+                                     , key = unit_Tag
                                      , label = unit_Label
                                      , createdDate = fromString $ show unit_CreatedDate
                                      , modifiedDate = m
@@ -100,7 +103,7 @@ toUnitQL (Entity unitId unit) = Unit { unitId = fromIntegral $ fromSqlKey unitId
                                   Nothing -> Nothing
 
 fromUnitQL :: UnitArg -> UTCTime -> Maybe UTCTime -> Unit_
-fromUnitQL (UnitArg {..}) cd md = Unit_ { unit_Key = key
+fromUnitQL (UnitArg {..}) cd md = Unit_ { unit_Tag = key
                                         , unit_Label = label
                                         , unit_CreatedDate = cd
                                         , unit_ModifiedDate = md

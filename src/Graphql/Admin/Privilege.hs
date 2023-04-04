@@ -13,11 +13,11 @@
 {-# LANGUAGE RecordWildCards       #-}
 
 module Graphql.Admin.Privilege (Privileges, Privilege, PrivilegeArg, resolvePrivilege, resolveSavePrivilege, toPrivilegeQL) where
+--module Graphql.Admin.Privilege (Privileges, Privilege, PrivilegeArg) where
 
 import Import
 import GHC.Generics
-import Data.Morpheus.Kind (INPUT_OBJECT)
-import Data.Morpheus.Types (GQLType, lift, Res, MutRes)
+import Data.Morpheus.Types (ResolverQ, ResolverM, GQLType)
 import Database.Persist.Sql (toSqlKey, fromSqlKey)
 import Prelude as P
 import Graphql.Utils
@@ -39,8 +39,8 @@ data PrivilegeArg = PrivilegeArg { privilegeId :: Int
                                  , active :: Bool
                                  } deriving (Generic, GQLType)
 
-data Privileges = Privileges { privilege :: EntityIdArg -> Res () Handler Privilege
-                             , list :: PageArg -> Res () Handler [Privilege]
+data Privileges m = Privileges { privilege :: EntityIdArg -> m Privilege
+                             , list :: PageArg -> m [Privilege]
                              } deriving (Generic, GQLType)
 
 -- DB ACTIONS
@@ -62,19 +62,19 @@ dbFetchPrivileges PageArg {..} = do
                                                 Nothing -> 10
 
 -- Query Resolvers
-findByIdResolver :: EntityIdArg -> Res e Handler Privilege
+findByIdResolver :: EntityIdArg -> ResolverQ ()  Handler Privilege
 findByIdResolver EntityIdArg {..} = lift $ dbFetchPrivilegeById privilegeId
                                               where
                                                 privilegeId = (toSqlKey $ fromIntegral $ entityId)::Privilege_Id
 
-listResolver :: PageArg -> Res e Handler [Privilege]
+listResolver :: PageArg -> ResolverQ () Handler [Privilege]
 listResolver listArgs = lift $ dbFetchPrivileges listArgs
 
-resolvePrivilege :: () -> Res e Handler Privileges
-resolvePrivilege _ = pure Privileges {  privilege = findByIdResolver, list = listResolver }
+resolvePrivilege :: ResolverQ () Handler Privileges
+resolvePrivilege = pure Privileges {  privilege = findByIdResolver, list = listResolver }
 
 -- Mutation Resolvers
-resolveSavePrivilege :: PrivilegeArg -> MutRes e Handler Privilege
+resolveSavePrivilege :: PrivilegeArg -> ResolverM () Handler Privilege
 resolveSavePrivilege arg = lift $ createOrUpdatePrivilege arg
 
 createOrUpdatePrivilege :: PrivilegeArg -> Handler Privilege
@@ -84,7 +84,7 @@ createOrUpdatePrivilege privilege = do
                 entityId <- if privilegeId > 0 then
                                 do
                                   let privilegeKey = (toSqlKey $ fromIntegral $ privilegeId)::Privilege_Id
-                                  _ <- runDB $ update privilegeKey [ Privilege_Key =. key
+                                  _ <- runDB $ update privilegeKey [ Privilege_Tag =. key
                                                                    , Privilege_Name =. name
                                                                    , Privilege_Description =. description
                                                                    , Privilege_Active =. active
@@ -107,7 +107,7 @@ createOrUpdatePrivilege privilege = do
 --     modifiedDate UTCTime
 toPrivilegeQL :: Entity Privilege_ -> Privilege
 toPrivilegeQL (Entity privilegeId privilege) = Privilege { privilegeId = fromIntegral $ fromSqlKey privilegeId
-                                                         , key = privilege_Key
+                                                         , key = privilege_Tag
                                                          , name = privilege_Name
                                                          , description = privilege_Description
                                                          , active = privilege_Active
@@ -121,7 +121,7 @@ toPrivilegeQL (Entity privilegeId privilege) = Privilege { privilegeId = fromInt
                                                               Nothing -> Nothing
 
 fromPrivilegeQL :: PrivilegeArg -> UTCTime -> Maybe UTCTime -> Privilege_
-fromPrivilegeQL (PrivilegeArg {..}) cd md = Privilege_ { privilege_Key = key
+fromPrivilegeQL (PrivilegeArg {..}) cd md = Privilege_ { privilege_Tag = key
                                                     , privilege_Name = name
                                                     , privilege_Description = description
                                                     , privilege_Active = active

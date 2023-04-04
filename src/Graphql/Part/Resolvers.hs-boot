@@ -21,5 +21,13 @@ module Graphql.Part.Resolvers (
 import Import
 import Graphql.DataTypes
 
-getItemByIdResolver_ :: forall (o :: * -> (* -> *) -> * -> *).(Typeable o, MonadTrans (o ())) => Part_Id -> () -> o () Handler (Part o)
-toItemQL :: forall (o :: * -> (* -> *) -> * -> *).(Typeable o, MonadTrans (o ())) => Entity Part_ -> Part o
+getItemByIdResolver_ ::
+                   forall {site} {t :: (* -> *) -> * -> *} {t1 :: (* -> *) -> * -> *}.
+                   (BaseBackend (YesodPersistBackend site) ~ SqlBackend,
+                    YesodPersist site, PersistStoreRead (YesodPersistBackend site),
+                    MonadTrans t, MonadTrans t1) =>
+                   Key Part_ -> t (HandlerFor site) (Part (t1 (HandlerFor App)))
+toItemQL ::
+                   forall {t :: (* -> *) -> * -> *}.
+                   MonadTrans t =>
+                   Entity Part_ -> Part (t (HandlerFor App))

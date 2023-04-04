@@ -34,37 +34,37 @@ import Graphql.Utils
 import Graphql.Admin.DataTypes
 
 -- Query Resolvers
-personResolver :: (Applicative f, Typeable o, MonadTrans (o ())) => () -> f (Persons o)
+--personResolver :: (Applicative f, Typeable o, MonadTrans (o ())) => () -> f (Persons o)
 personResolver _ = pure Persons { person = getPersonByIdResolver
                                 , page = pagePersonResolver
                                 , createUpdatePerson = createUpdatePersonResolver
                                 }
 
-getPersonByIdResolver :: forall (o :: * -> (* -> *) -> * -> *).(Typeable o, MonadTrans (o ())) => EntityIdArg -> o () Handler (Person o)
+--getPersonByIdResolver :: forall (o :: * -> (* -> *) -> * -> *).(Typeable o, MonadTrans (o ())) => EntityIdArg -> o () Handler (Person o)
 getPersonByIdResolver EntityIdArg {..} = lift $ do
                                       let personEntityId = (toSqlKey $ fromIntegral $ entityId)::Person_Id
                                       person <- runDB $ getJustEntity personEntityId
                                       return $ toPersonQL person
 
-getPersonByIdResolver_ :: forall (o :: * -> (* -> *) -> * -> *).(Typeable o, MonadTrans (o ())) => Person_Id -> () -> o () Handler (Person o)
-getPersonByIdResolver_ personId _ = lift $ do
+--getPersonByIdResolver_ :: forall (o :: * -> (* -> *) -> * -> *).(Typeable o, MonadTrans (o ())) => Person_Id -> () -> o () Handler (Person o)
+getPersonByIdResolver_ personId = lift $ do
                                       person <- runDB $ getJustEntity personId
                                       return $ toPersonQL person
 
-addressResolver :: (MonadTrans t) => Person_Id -> () -> t Handler (Maybe Address)
-addressResolver personId _ = lift $ do
+--addressResolver :: (MonadTrans t) => Person_Id -> () -> t Handler (Maybe Address)
+addressResolver personId = lift $ do
                     addressMaybe <- runDB $ selectFirst [Address_PersonId ==. personId] []
                     let address = case addressMaybe of
                                     Nothing -> Nothing
                                     Just a -> Just $ toAddressQL a
                     return address
 
-contactInfoResolver :: (MonadTrans t) => Person_Id -> () -> t Handler [ContactInfo]
-contactInfoResolver personId _ = lift $ do
+--contactInfoResolver :: (MonadTrans t) => Person_Id -> () -> t Handler [ContactInfo]
+contactInfoResolver personId = lift $ do
                                       contacts <- runDB $ selectList [ContactInfo_PersonId ==. personId] []
                                       return $ P.map toContactQL contacts
 
-pagePersonResolver :: (Typeable o, MonadTrans t, MonadTrans (o ())) => PageArg -> t Handler (Page (Person o))
+--pagePersonResolver :: (Typeable o, MonadTrans t, MonadTrans (o ())) => PageArg -> t Handler (Page (Person o))
 pagePersonResolver page = lift $ do
                                 countItems <- personQueryCount page
                                 persons <- personQuery page
@@ -119,7 +119,7 @@ personQuery page =  do
                         pageIndex_ = fromIntegral $ case pageIndex of Just  x  -> x; Nothing -> 0
                         pageSize_ = fromIntegral $ case pageSize of Just y -> y; Nothing -> 10
 
-createUpdatePersonResolver :: (Typeable o, MonadTrans t, MonadTrans (o ())) => PersonArg -> t Handler (Person o)
+--createUpdatePersonResolver :: (Typeable o, MonadTrans t, MonadTrans (o ())) => PersonArg -> t Handler (Person o)
 createUpdatePersonResolver arg = lift $ do
                                 personId <- createOrUpdatePerson arg
                                 person <- runDB $ getJustEntity personId
@@ -197,7 +197,7 @@ updateContact_ (x:xs)= do
                         return ()
 
 --toPersonQL :: Entity Person_ -> (Person Res)
-toPersonQL :: (Typeable o, MonadTrans (o ())) => Entity Person_ -> Person o
+--toPersonQL :: (Typeable o, MonadTrans (o ())) => Entity Person_ -> Person o
 toPersonQL (Entity personId person) = Person { personId = fromIntegral $ fromSqlKey personId
                                              , firstName = person_FirstName
                                              , lastName = person_LastName

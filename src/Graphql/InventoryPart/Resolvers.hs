@@ -34,25 +34,26 @@ import Graphql.DataTypes ()
 import Graphql.InventoryPart.Persistence
 
 -- Query Resolvers
-inventoryItemsResolver :: (Applicative f, Typeable o, MonadTrans (o ())) => () -> f (InventoryItems o)
+--inventoryItemsResolver :: (Applicative f, Typeable o, MonadTrans (o ())) => () -> f (InventoryItems o)
 inventoryItemsResolver _ = pure InventoryItems { inventoryItem = findInventoryItemByIdResolver
                                                , page = inventoryItemsPageResolver
                                                , saveInventoryItem = saveInventoryItemResolver
                                                }
 
-findInventoryItemByIdResolver :: (Typeable o, MonadTrans t, MonadTrans (o ())) => EntityIdArg -> t Handler (InventoryItem o)
+--findInventoryItemByIdResolver :: (Typeable o, MonadTrans t, MonadTrans (o ())) => EntityIdArg -> t Handler (InventoryItem o)
 findInventoryItemByIdResolver EntityIdArg {..} = lift $ do
                                               let inventoryItemId = (toSqlKey $ fromIntegral $ entityId)::InventoryPart_Id
 --                                              let inventoryItemId = InventoryPart_Key {unInventoryPart_Key  = partId}
                                               inventoryItem <- runDB $ getJustEntity inventoryItemId
                                               return $ toInventoryItemQL inventoryItem
 
-getInventoryItemByIdResolver_ :: (Typeable o, MonadTrans t, MonadTrans (o ())) => InventoryPart_Id -> () -> t Handler (InventoryItem o)
-getInventoryItemByIdResolver_ inventoryItemId _ = lift $ do
+--getInventoryItemByIdResolver_ :: (Typeable o, MonadTrans t, MonadTrans (o ())) => InventoryPart_Id -> () -> t Handler (InventoryItem o)
+getInventoryItemByIdResolver_ inventoryItemId = lift $ do
                                               inventoryItem <- runDB $ getJustEntity inventoryItemId
                                               return $ toInventoryItemQL inventoryItem
 
-inventoryItemsPageResolver_ :: (Typeable o, MonadTrans t, MonadTrans (o ())) => Inventory_Id -> PageArg -> t Handler (Page (InventoryItem o))
+--inventoryItemsPageResolver_ :: (Typeable o, MonadTrans t, MonadTrans (o ())) => Inventory_Id -> PageArg -> t Handler (Page (InventoryItem o))
+--inventoryItemsPageResolver_ :: Entity Inventory_ -> PageArg -> Page (InventoryItem (t1 (HandlerFor site0)))
 inventoryItemsPageResolver_ inventoryId page = lift $ do
                                     countItems <- inventoryItemQueryCount page
                                     items <- inventoryItemQuery page
@@ -70,7 +71,7 @@ inventoryItemsPageResolver_ inventoryId page = lift $ do
                                        pageIndex' = case pageIndex of Just  x  -> x; Nothing -> 0
                                        pageSize' = case pageSize of Just y -> y; Nothing -> 10
 
-inventoryItemsItemPageResolver_ :: (Typeable o, MonadTrans t, MonadTrans (o ())) => Part_Id -> PageArg -> t Handler (Page (InventoryItem o))
+--inventoryItemsItemPageResolver_ :: (Typeable o, MonadTrans t, MonadTrans (o ())) => Part_Id -> PageArg -> t Handler (Page (InventoryItem o))
 inventoryItemsItemPageResolver_ partId (PageArg {..}) = lift $ do
                                     countItems <- runDB $ count ([InventoryPart_PartId ==. partId] :: [Filter InventoryPart_])
                                     items <- runDB $ selectList [InventoryPart_PartId ==. partId] [Asc InventoryPart_Id, LimitTo pageSize', OffsetBy $ pageIndex' * pageSize']
@@ -91,7 +92,7 @@ inventoryItemsItemPageResolver_ partId (PageArg {..}) = lift $ do
                                                       Just y -> y
                                                       Nothing -> 10
 
-inventoryItemsPageResolver :: (Typeable o, MonadTrans t, MonadTrans (o ())) => PageArg -> t Handler (Page (InventoryItem o))
+--inventoryItemsPageResolver :: (Typeable o, MonadTrans t, MonadTrans (o ())) => PageArg -> t Handler (Page (InventoryItem o))
 inventoryItemsPageResolver PageArg {..} = lift $ do
                         countItems <- runDB $ count ([] :: [Filter InventoryPart_])
                         items <- runDB $ selectList [] [Asc InventoryPart_Id, LimitTo pageSize', OffsetBy $ pageIndex' * pageSize']
@@ -113,13 +114,13 @@ inventoryItemsPageResolver PageArg {..} = lift $ do
                                           Nothing -> 10
 
 -- Mutation Resolvers
-saveInventoryItemResolver :: (Typeable o, MonadTrans t, MonadTrans (o ())) => InventoryPartArg -> t Handler (InventoryItem o)
+--saveInventoryItemResolver :: (Typeable o, MonadTrans t, MonadTrans (o ())) => InventoryPartArg -> t Handler (InventoryItem o)
 saveInventoryItemResolver arg = lift $ do
                               inventoryItemId <- createOrUpdateInventoryItem arg
                               inventoryItem <- runDB $ getJustEntity inventoryItemId
                               return $ toInventoryItemQL inventoryItem
 
-saveInventoryItemsResolver :: (Typeable o, MonadTrans t, MonadTrans (o ())) => InventoryItemsArg -> t Handler [InventoryItem o]
+--saveInventoryItemsResolver :: (Typeable o, MonadTrans t, MonadTrans (o ())) => InventoryItemsArg -> t Handler [InventoryItem o]
 saveInventoryItemsResolver arg = lift $ do
                               let InventoryItemsArg {..} = arg
                               let inventoryItemArgs =  P.map (\partId -> InventoryPartArg { inventoryItemId = 0
@@ -136,7 +137,7 @@ saveInventoryItemsResolver arg = lift $ do
                               inventoryItems <- runDB $ mapM getJustEntity inventoryItemIds
                               return $ P.map toInventoryItemQL inventoryItems
 
-toInventoryItemQL :: (Typeable o, MonadTrans (o ())) => Entity InventoryPart_ -> InventoryItem o
+--toInventoryItemQL :: (Typeable o, MonadTrans (o ())) => Entity InventoryPart_ -> InventoryItem o
 toInventoryItemQL (Entity inventoryItemId inventoryItem) = InventoryItem { inventoryItemId = fromIntegral $ fromSqlKey inventoryItemId
                                                                          , level = inventoryPart_Level
                                                                          , maxLevelAllowed = inventoryPart_MaxLevelAllowed

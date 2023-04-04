@@ -16,12 +16,11 @@
 module Graphql.Root (api, apiDoc) where
 
 import           GHC.Generics
-import           Data.Morpheus              (interpreter)
-import           Data.Morpheus.Document     ()
-import           Data.Morpheus.Types        (RootResolver (..), GQLType(..), Undefined(..), Res, MutRes, GQLRequest, GQLResponse)
-import           Data.Morpheus.Document (toGraphQLDocument)
-import           Import
-import           Data.ByteString.Lazy.Internal (ByteString)
+import           Data.Morpheus (interpreter)
+import           Data.Morpheus.Server (printSchema)
+import           Data.Morpheus.Types (RootResolver (..), GQLType(..), Undefined(..), QUERY, MUTATION, GQLRequest, GQLResponse, ResolverQ)
+import           Import hiding (Proxy, proxy, ByteString, Query)
+import           Data.Proxy (Proxy(..))
 import           Graphql.Session
 import           Graphql.Admin.Privilege
 import           Graphql.Admin.Role
@@ -30,78 +29,64 @@ import           Graphql.Admin.Person
 import           Graphql.Admin.User
 import           Graphql.PartCategory
 import           Graphql.Unit
---import           Graphql.Maintenance.SubTask.SubTaskKind
---import           Graphql.Maintenance.Task.TaskCategory
 import           Graphql.Part.Resolvers
 import           Graphql.Inventory.Resolvers
 import           Graphql.InventoryPart.Resolvers
 import           Graphql.Utils ()
 import           Graphql.DataTypes
---import           Graphql.Human.EmployeeJob
--- importGQLDocumentWithNamespace "schema.gql"
 
-data QueryQL m = QueryQL { -- deity :: DeityArgs -> m Deity
-                           session :: () -> Res () Handler Session
-                         , privileges :: () -> m Privileges
-                         , roles :: () -> m Roles
---                         , persons :: () -> m Persons
---                         , users :: () -> m Users
-                         , persons :: () -> Res () Handler (Persons Res)
-                         , users :: () -> Res () Handler (Users Res)
-                         , categories :: PartCategoryFilter -> m [PartCategory]
-                         , units :: () -> m [Unit]
-                         , inventories :: () -> Res () Handler (Inventories Res)
-                         , items :: () -> Res () Handler (Items Res)
-                         , inventoryItems :: () -> Res () Handler (InventoryItems Res)
+data Query m = Query {
+                            session :: m Session
+                          , privileges :: m (Privileges m)
+                          , roles :: m (Roles m)
+                          , persons :: m (Persons m)
+                          , users :: m (Users m)
+                          , categories :: PartCategoryFilter -> m [PartCategory]
+                          , units :: m [Unit]
+                          , inventories :: m (Inventories m)
+                          , items :: m (Items m)
+                          , inventoryItems :: m (InventoryItems m)
                          } deriving (Generic, GQLType)
 
-data Mutation m = Mutation { savePrivilege :: PrivilegeArg -> m Privilege
-                           , saveRole :: RoleArg -> m (Role MutRes)
-                           , persons :: () -> MutRes () Handler (Persons MutRes)
-                           , users :: () -> MutRes () Handler (Users MutRes)
---                           , savePerson :: PersonArg -> m (Person MutRes)
+data Mutation m = Mutation {
+                             savePrivilege :: PrivilegeArg -> m Privilege
+                           , saveRole :: RoleArg -> m (Role m)
+                           , persons :: m (Persons m)
+                           , users :: m (Users m)
                            , saveCategory :: PartCategoryArg -> m PartCategory
                            , saveUnit :: UnitArg -> m Unit
---                           , saveTaskCategory :: TaskPartCategoryArg -> m TaskCategory
---                           , saveSubTaskKind :: SubTaskKindArg -> m SubTaskKind
---                           , saveEmployeeJob :: EmployeeJobArg -> m EmployeeJob
---                           , saveInventory :: InventoryArg -> m (Inventory MutRes)
---                           , saveItem :: PartArg -> m (Part MutRes)
---                           , saveInventoryItem :: InventoryPartArg -> m (InventoryItem MutRes)
-                           , inventoryItems :: () -> MutRes () Handler (InventoryItems MutRes)
-                           , items :: () -> MutRes () Handler (Items MutRes)
-                           , inventories :: () -> MutRes () Handler (Inventories MutRes)
+                           , inventoryItems :: m (InventoryItems m)
+                           , items :: m (Items m)
+                           , inventories :: m (Inventories m)
                            } deriving (Generic, GQLType)
 
---data DeityArgs = DeityArgs { name :: Text, mythology :: Maybe Text } deriving (Generic)
-
 -- | The query resolver
-resolveQuery::QueryQL (Res () Handler)
-resolveQuery = QueryQL { --deity = resolveDeity
+--resolveQuery::Query (QUERY () Handler)
+resolveQuery = Query {
                          session = getUserSessionResolver
                        , privileges = resolvePrivilege
-                       , roles = resolveRole
-                       , persons = personResolver
-                       , users = userResolver
+                       , roles = resolveRole ()
+                       , persons = personResolver ()
+                       , users = userResolver ()
                        , categories = listCategoryResolver
-                       , units = listUnitResolver
-                       , inventories = inventoryResolver
-                       , items = itemResolver
-                       , inventoryItems = inventoryItemsResolver
+                       , units = listUnitResolver ()
+                       , inventories = inventoryResolver ()
+                       , items = itemResolver ()
+                       , inventoryItems = inventoryItemsResolver ()
                        }
 -- | The mutation resolver
-resolveMutation::Mutation (MutRes () Handler)
-resolveMutation = Mutation { savePrivilege = resolveSavePrivilege
+--resolveMutation::Mutation (MUTATION () Handler)
+resolveMutation = Mutation {
+                             savePrivilege = resolveSavePrivilege
                            , saveRole =  resolveSaveRole
-                           , persons = personResolver
-                           , users = userResolver
+                           , persons = personResolver ()
+                           , users = userResolver ()
                            , saveCategory = saveCategoryResolver
                            , saveUnit = saveUnitResolver
-                           , inventories = inventoryResolver
-                           , items = itemResolver
-                           , inventoryItems = inventoryItemsResolver
+                           , inventories = inventoryResolver ()
+                           , items = itemResolver ()
+                           , inventoryItems = inventoryItemsResolver ()
                            }
-
 
 -- BASE EXAMPLE
 -- https://github.com/dnulnets/haccessability
@@ -111,16 +96,11 @@ resolveMutation = Mutation { savePrivilege = resolveSavePrivilege
 --                     deity <- runDB $ getEntity userId
 --                     return $ Deity {fullName = "dummy", power = Just "Shapeshifting", tests = testsResolver}
 
---resolveDeity :: DeityArgs -> Res e Handler Deity
---resolveDeity DeityArgs { name, mythology } = lift $ dbFetchDeity name
-
---testsResolver :: TestArg -> Res e Handler NoDeity
---testsResolver TestArg {yourFullName } = pure NoDeity {noFullName = "Test no full am", nopower = Just "no power"}
-
-rootResolver :: RootResolver Handler () QueryQL Mutation Undefined
-rootResolver = RootResolver { queryResolver = resolveQuery
+rootResolver :: RootResolver Handler () Query Mutation Undefined
+rootResolver = RootResolver {
+                                 queryResolver = resolveQuery
                                , mutationResolver = resolveMutation
-                               , subscriptionResolver = Undefined
+--                               , subscriptionResolver = Undefined
                                }
 
 -- | Compose the graphQL api
@@ -128,5 +108,13 @@ api:: GQLRequest -> Handler GQLResponse
 api r = do
          interpreter rootResolver r
 
-apiDoc :: Data.ByteString.Lazy.Internal.ByteString
-apiDoc = toGraphQLDocument $ Just rootResolver
+--api :: ByteString -> Handler ByteString
+--api = interpreter rootResolver
+
+--apiDoc :: Data.ByteString.Lazy.Internal.ByteString
+--apiDoc = toGraphQLDocument $ Just rootResolver
+
+proxy :: Proxy (RootResolver IO () Query Mutation Undefined)
+proxy = Proxy
+
+apiDoc = printSchema $ proxy

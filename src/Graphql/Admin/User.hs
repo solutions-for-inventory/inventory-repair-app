@@ -12,11 +12,13 @@
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE RecordWildCards       #-}
 
-module Graphql.Admin.User (
-    userResolver
-  , getUserByIdResolver
-  , getUserByIdResolver_
-) where
+--module Graphql.Admin.User (
+--    userResolver
+--  , getUserByIdResolver
+--  , getUserByIdResolver_
+--) where
+
+module Graphql.Admin.User where
 
 import Import
 import Database.Persist.Sql (toSqlKey, fromSqlKey)
@@ -33,7 +35,7 @@ import Graphql.Admin.Person (createOrUpdatePerson, getPersonByIdResolver_)
 import Data.Time ()
 import Enums
 
-userResolver :: (Applicative f, Typeable o, MonadTrans (o ())) => () -> f (Users o)
+--userResolver :: (Applicative f, Typeable o, MonadTrans (o ())) => () -> f (Users o)
 userResolver _ = pure Users { user = getUserByIdResolver
                             , page = usersPageResolver
                             , createUpdateUser = createUpdateUserResolver
@@ -42,19 +44,19 @@ userResolver _ = pure Users { user = getUserByIdResolver
                             , updatePassword = updatePasswordResolver
                             }
 
-getUserByIdResolver :: (Typeable o, MonadTrans t, MonadTrans (o ())) => EntityIdArg -> t Handler (User o)
+--getUserByIdResolver :: (Typeable o, MonadTrans t, MonadTrans (o ())) => EntityIdArg -> t Handler (User o)
 getUserByIdResolver EntityIdArg {..} = lift $ do
                                       let personId = (toSqlKey $ fromIntegral $ entityId)::Person_Id
                                       let userEntityId = User_Key {unUser_Key = personId}
                                       user <- runDB $ getJustEntity userEntityId
                                       return $ toUserQL user
 
-getUserByIdResolver_ :: (Typeable o, MonadTrans t, MonadTrans (o ())) => User_Id -> () -> t Handler (User o)
+--getUserByIdResolver_ :: (Typeable o, MonadTrans t, MonadTrans (o ())) => User_Id -> () -> t Handler (User o)
 getUserByIdResolver_ userId _ = lift $ do
                                       user <- runDB $ getJustEntity userId
                                       return $ toUserQL user
 
-usersPageResolver :: (Typeable o, MonadTrans t, MonadTrans (o ())) => PageArg -> t Handler (Page (User o))
+--usersPageResolver :: (Typeable o, MonadTrans t, MonadTrans (o ())) => PageArg -> t Handler (Page (User o))
 usersPageResolver _ = lift $ do
 --                        countItems <- equipmentQueryCount page
 --                        result <- equipmentQuery page
@@ -133,22 +135,22 @@ updatePasswordResolver UpdatePasswordArg {..} = lift $ do
 --                                          Just y -> y
 --                                          Nothing -> 10
 
-userPrivilegeResolver :: (MonadTrans t) => Person_Id -> () -> t Handler [Privilege]
-userPrivilegeResolver userId _ = lift $ do
+--userPrivilegeResolver :: (MonadTrans t) => Person_Id -> () -> t Handler [Privilege]
+userPrivilegeResolver userId = lift $ do
                                       userPrivileges <- runDB $ selectList ([UserPrivilege_UserId ==. userId] :: [Filter UserPrivilege_]) []
                                       let privilegeIds = P.map (\(Entity _ (UserPrivilege_ _ privilegeId)) -> privilegeId) userPrivileges
                                       privileges <- runDB $ selectList ([Privilege_Id <-. privilegeIds] :: [Filter Privilege_]) []
                                       return $ P.map toPrivilegeQL privileges
 
-userRoleResolver :: (Typeable o, MonadTrans t, MonadTrans (o ())) => Person_Id -> () -> t Handler [Role o]
-userRoleResolver userId _ = lift $ do
+--userRoleResolver :: (Typeable o, MonadTrans t, MonadTrans (o ())) => Person_Id -> () -> t Handler [Role o]
+userRoleResolver userId = lift $ do
                                       userRoles <- runDB $ selectList ([UserRole_UserId ==. userId] :: [Filter UserRole_]) []
                                       let roleIds = P.map (\(Entity _ (UserRole_ _ roleId)) -> roleId) userRoles
                                       roles <- runDB $ selectList ([Role_Id <-. roleIds] :: [Filter Role_]) []
                                       return $ P.map toRoleQL roles
 
 -- Mutation Resolvers
-createUpdateUserResolver :: (Typeable o, MonadTrans t, MonadTrans (o ())) => UserArg -> t Handler (User o)
+--createUpdateUserResolver :: (Typeable o, MonadTrans t, MonadTrans (o ())) => UserArg -> t Handler (User o)
 createUpdateUserResolver userArg = lift $ do
                                 userId <- createOrUpdateUser userArg
                                 let userKey = User_Key {unUser_Key = userId}
@@ -220,7 +222,7 @@ createOrUpdateUserPrivilege userId entityPrivilegeIds = do
                             return ()
 
 
-toUserQL :: (Typeable o, MonadTrans (o ())) => Entity User_ -> User o
+--toUserQL :: (Typeable o, MonadTrans (o ())) => Entity User_ -> User o
 toUserQL (Entity userId user) = User { userId = fromIntegral $ fromSqlKey user_UserId
                                      , username = user_Username
                                      , email = user_Email

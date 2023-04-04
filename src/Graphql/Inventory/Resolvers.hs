@@ -30,37 +30,41 @@ import Graphql.InventoryPart.Resolvers
 import Graphql.Part.Resolvers
 import Graphql.Inventory.Persistence ()
 
-inventoryResolver :: (Applicative f, Typeable o,MonadTrans (o ())) => p -> f (Inventories o)
+--inventoryResolver :: (Applicative f, Typeable o,MonadTrans (o ())) => p -> f (Inventories o)
 inventoryResolver _ = pure Inventories { inventory = getInventoryByIdResolver
-                                       , list = listInventoryResolver
+                                       , list = listInventoryResolver ()
                                        , saveInventory = saveInventoryResolver
                                        , saveInventoryItems = saveInventoryItemsResolver
                                        }
 
-getInventoryByIdResolver :: forall (o :: * -> (* -> *) -> * -> *).(Typeable o, MonadTrans (o ())) => EntityIdArg -> o () Handler (Inventory o)
+--getInventoryByIdResolver :: forall (o :: * -> (* -> *) -> * -> *).(Typeable o, MonadTrans (o ())) => EntityIdArg -> o () Handler (Inventory o)
 getInventoryByIdResolver EntityIdArg {..} = lift $ do
                                               let inventoryId = (toSqlKey $ fromIntegral $ entityId)::Inventory_Id
                                               inventory <- runDB $ getJustEntity inventoryId
                                               return $ toInventoryQL inventory
 
-getInventoryByIdResolver_ :: forall (o :: * -> (* -> *) -> * -> *).(Typeable o, MonadTrans (o ())) => Inventory_Id -> () -> o () Handler (Inventory o)
-getInventoryByIdResolver_ inventoryId _ = lift $ do
+--getInventoryByIdResolver_ :: forall (o :: * -> (* -> *) -> * -> *).(Typeable o, MonadTrans (o ())) => Inventory_Id -> () -> o () Handler (Inventory o)
+getInventoryByIdResolver_ inventoryId = lift $ do
                                     inventory <- runDB $ getJustEntity inventoryId
                                     return $ toInventoryQL inventory
 
-listInventoryResolver :: forall (o :: * -> (* -> *) -> * -> *).(Typeable o, MonadTrans (o ())) => () -> o () Handler [Inventory o]
+--listInventoryResolver :: forall (o :: * -> (* -> *) -> * -> *).(Typeable o, MonadTrans (o ())) => () -> o () Handler [Inventory o]
 listInventoryResolver _ = lift $ do
                             inventories <- runDB $ selectList ([] :: [Filter Inventory_]) []
                             return $ P.map toInventoryQL inventories
 
-saveInventoryResolver :: forall (o :: * -> (* -> *) -> * -> *).(Typeable o, MonadTrans (o ())) => InventoryArg -> o () Handler (Inventory o)
+--saveInventoryResolver :: forall (o :: * -> (* -> *) -> * -> *).(Typeable o, MonadTrans (o ())) => InventoryArg -> o () Handler (Inventory o)
 saveInventoryResolver arg = lift $ do
                                   inventoryId <- createOrUpdateInventory arg
                                   inventory <- runDB $ getJustEntity inventoryId
                                   return $ toInventoryQL inventory
 
 -- CONVERTERS
-toInventoryQL :: forall (o :: * -> (* -> *) -> * -> *).(Typeable o, MonadTrans (o ())) => Entity Inventory_ -> Inventory o
+--toInventoryQL :: forall (o :: * -> (* -> *) -> * -> *).(Typeable o, MonadTrans (o ())) => Entity Inventory_ -> Inventory o
+--toInventoryQL :: (BaseBackend (YesodPersistBackend site1) ~ SqlBackend,
+--                   PersistQueryRead (YesodPersistBackend site1), YesodPersist site1,
+--                   MonadTrans t1) =>
+--                  Entity Inventory_ -> Inventory (t1 (HandlerFor site1))
 toInventoryQL (Entity inventoryId inventory) = Inventory { inventoryId = fromIntegral $ fromSqlKey inventoryId
                                                          , name = inventory_Name
                                                          , description = inventory_Description

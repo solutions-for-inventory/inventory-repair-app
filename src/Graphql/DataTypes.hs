@@ -22,21 +22,21 @@ import Graphql.Utils (Page, PageArg, EntityIdArg, EntityChangeStatusArg)
 import Graphql.PartCategory
 import Graphql.Unit
 
-data Inventory o = Inventory { inventoryId :: Int
+data Inventory m = Inventory { inventoryId :: Int
                              , name :: Text
                              , description :: Text
                              , allowNegativeStocks :: Bool
                              , status :: Text
-                             , inventoryItems :: PageArg -> o () Handler (Page (InventoryItem o))
-                             , availableItems :: PageArg -> o () Handler (Page (Part o))
+                             , inventoryItems :: PageArg -> m (Page (InventoryItem m))
+                             , availableItems :: PageArg -> m (Page (Part m))
                              , createdDate :: Text
                              , modifiedDate :: Maybe Text
                              } deriving (Generic, GQLType)
 
-data Inventories o = Inventories { inventory :: EntityIdArg ->  o () Handler (Inventory o)
-                                 , list :: () -> o () Handler [Inventory o]
-                                 , saveInventory :: InventoryArg -> o () Handler (Inventory o)
-                                 , saveInventoryItems :: InventoryItemsArg -> o () Handler [InventoryItem o]
+data Inventories m = Inventories { inventory :: EntityIdArg ->  m (Inventory m)
+                                 , list ::  m [Inventory m]
+                                 , saveInventory :: InventoryArg -> m (Inventory m)
+                                 , saveInventoryItems :: InventoryItemsArg -> m [InventoryItem m]
                                  } deriving (Generic, GQLType)
 
 -- Mutation
@@ -48,7 +48,7 @@ data InventoryArg = InventoryArg { inventoryId :: Int
                                  , orgUnitId :: Int
                                  } deriving (Generic, GQLType)
 
-data InventoryItem o = InventoryItem { inventoryItemId :: Int
+data InventoryItem m = InventoryItem { inventoryItemId :: Int
                                      , status :: Text
                                      , level :: Int
                                      , maxLevelAllowed :: Int
@@ -56,15 +56,15 @@ data InventoryItem o = InventoryItem { inventoryItemId :: Int
                                      , price :: Float
                                      , location :: Text
                                      , dateExpiry :: Maybe Text
-                                     , inventory :: () -> o () Handler (Inventory o)
-                                     , item :: () -> o () Handler (Part o)
+                                     , inventory ::  m (Inventory m)
+                                     , item ::  m (Part m)
                                      , createdDate :: Text
                                      , modifiedDate :: Maybe Text
                                      } deriving (Generic, GQLType)
 
-data InventoryItems o = InventoryItems { inventoryItem :: EntityIdArg -> o () Handler (InventoryItem o)
-                                       , page :: PageArg -> o () Handler (Page (InventoryItem o))
-                                       , saveInventoryItem :: InventoryPartArg -> o () Handler (InventoryItem o)
+data InventoryItems m = InventoryItems { inventoryItem :: EntityIdArg -> m (InventoryItem m)
+                                       , page :: PageArg -> m (Page (InventoryItem m))
+                                       , saveInventoryItem :: InventoryPartArg -> m (InventoryItem m)
                                        } deriving (Generic, GQLType)
 
 data InventoryPartArg = InventoryPartArg { inventoryItemId :: Int
@@ -90,7 +90,7 @@ data InventoryItemsArg = InventoryItemsArg { level :: Int
                                            , itemIds :: [Int]
                                            } deriving (Generic, GQLType)
 
-data Part o = Part { partId :: Int
+data Part m = Part { partId :: Int
                    , partNumber :: Text
                    , name :: Text
                    , defaultPrice :: Float
@@ -101,17 +101,17 @@ data Part o = Part { partId :: Int
                    , notes:: Maybe Text
                    , status :: Text
                    , images :: [Text]
-                   , partCategory :: Maybe(() -> o () Handler PartCategory)
-                   , unit :: Maybe (() -> o () Handler Unit)
-                   , inventoryItems :: PageArg -> o () Handler (Page (InventoryItem o))
+                   , partCategory :: Maybe(m PartCategory)
+                   , unit :: Maybe (m Unit)
+                   , inventoryItems :: PageArg -> m (Page (InventoryItem m))
                    , createdDate :: Text
                    , modifiedDate :: Maybe Text
                    } deriving (Generic, GQLType)
 
-data Items o = Items { item :: EntityIdArg -> o () Handler (Part o)
-                     , page :: PageArg -> o () Handler (Page (Part o))
-                     , saveItem :: PartArg -> o () Handler (Part o)
-                     , changeItemStatus :: EntityChangeStatusArg -> o () Handler Bool
+data Items m = Items { item :: EntityIdArg -> m (Part m)
+                     , page :: PageArg -> m (Page (Part m))
+                     , saveItem :: PartArg -> m (Part m)
+                     , changeItemStatus :: EntityChangeStatusArg -> m Bool
                      } deriving (Generic, GQLType)
 
 data PartArg = PartArg { partId :: Int
